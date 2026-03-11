@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Rezerwacji - Aula Główna</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>Aula Główna Uniwersytetu</h1>
+        <nav>
+          <ul>
+            <li>
+              <a href="#" onclick="showView('view-events')">Strona Główna</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="view-events" class="view active">
+        <h2>Wybierz wydarzenie</h2>
+        <div class="events-grid">
+          <div
+            class="event-card"
+            onclick="startReservation('Wykład Inauguracyjny')"
+          >
+            <h3>Wykład Inauguracyjny</h3>
+            <p><strong>Data:</strong> 20 Marca 2026</p>
+            <p>Uroczyste rozpoczęcie semestru letniego.</p>
+            <button class="btn btn-primary">Rezerwuj</button>
+          </div>
+          <div class="event-card" onclick="startReservation('Konferencja AI')">
+            <h3>Konferencja AI</h3>
+            <p><strong>Data:</strong> 5 Kwietnia 2026</p>
+            <p>Przyszłość sztucznej inteligencji.</p>
+            <button class="btn btn-primary">Rezerwuj</button>
+          </div>
+          <div
+            class="event-card"
+            onclick="startReservation('Gala Absolwentów')"
+          >
+            <h3>Gala Absolwentów</h3>
+            <p><strong>Data:</strong> 15 Maja 2026</p>
+            <p>Rozdanie dyplomów dla rocznika 2025/2026.</p>
+            <button class="btn btn-primary">Rezerwuj</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-tickets" class="view">
+        <h2 id="selected-event-title">Wydarzenie</h2>
+        <div class="step-container">
+          <h3>Krok 1: Ile miejsc potrzebujesz?</h3>
+          <div class="form-group">
+            <label for="ticket-count">Liczba osób:</label>
+            <input type="number" id="ticket-count" min="1" max="10" value="1" />
+          </div>
+          <button class="btn btn-secondary" onclick="showView('view-events')">
+            Wróć
+          </button>
+          <button class="btn btn-primary" onclick="showView('view-seats')">
+            Dalej: Wybierz miejsca
+          </button>
+        </div>
+      </section>
+
+      <section id="view-seats" class="view">
+        <h2>Wybór miejsc w Auli</h2>
+        <div class="step-container">
+          <h3>Krok 2: Kliknij na krzesła, aby je zająć</h3>
+
+          <div class="screen-indicator">SCENA</div>
+
+          <div class="seat-map" id="seat-map"></div>
+
+          <div class="legend">
+            <span class="seat-legend available"></span> Wolne
+            <span class="seat-legend selected"></span> Wybrane
+            <span class="seat-legend occupied"></span> Zajęte
+          </div>
+
+          <div class="action-buttons">
+            <button
+              class="btn btn-secondary"
+              onclick="showView('view-tickets')"
+            >
+              Wróć
+            </button>
+            <button class="btn btn-primary" onclick="finishReservation()">
+              Potwierdź rezerwację
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-success" class="view">
+        <div class="step-container" style="text-align: center">
+          <h2 style="color: #4caf50">Rezerwacja zakończona sukcesem!</h2>
+          <p>Twoje miejsca zostały zapisane w systemie.</p>
+          <button class="btn btn-primary" onclick="showView('view-events')">
+            Powrót do strony głównej
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      function showView(viewId) {
+        const views = document.querySelectorAll(".view");
+        views.forEach((view) => view.classList.remove("active"));
+
+        document.getElementById(viewId).classList.add("active");
+      }
+
+      function startReservation(eventName) {
+        document.getElementById("selected-event-title").innerText =
+          "Rezerwacja: " + eventName;
+        showView("view-tickets");
+        generateSeats();
+      }
+
+      function generateSeats() {
+        const seatMap = document.getElementById("seat-map");
+        seatMap.innerHTML = "";
+
+        for (let i = 0; i < 50; i++) {
+          const seat = document.createElement("div");
+          seat.classList.add("seat");
+
+          if (Math.random() < 0.2) {
+            seat.classList.add("occupied");
+          } else {
+            seat.onclick = function () {
+              this.classList.toggle("selected");
+            };
+          }
+          seatMap.appendChild(seat);
+        }
+      }
+
+      function finishReservation() {
+        const selectedSeats =
+          document.querySelectorAll(".seat.selected").length;
+        if (selectedSeats === 0) {
+          alert("Wybierz przynajmniej jedno miejsce przed potwierdzeniem!");
+          return;
+        }
+        showView("view-success");
+      }
+    </script>
+  </body>
+</html>
