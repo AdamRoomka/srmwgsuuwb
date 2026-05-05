@@ -33,7 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_event']) && !i
                 'created_by' => $currentUser['id'],
             ]);
 
-            $reservationMessage = 'Nowe wydarzenie zostało dodane.';
+            $_SESSION['reservationMessage'] = 'Nowe wydarzenie zostało dodane.';
+            header('Location: index.php');
+            exit;
         }
     }
 }

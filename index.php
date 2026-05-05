@@ -13,8 +13,9 @@ $events = [];
 $occupiedSeatsByEvent = [];
 $dbError = null;
 $loginError = null;
-$reservationMessage = null;
-$reservationError = null;
+$reservationMessage = $_SESSION['reservationMessage'] ?? null;
+$reservationError = $_SESSION['reservationError'] ?? null;
+unset($_SESSION['reservationMessage'], $_SESSION['reservationError']);
 $currentUser = $_SESSION['user'] ?? null;
 
 try {

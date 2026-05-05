@@ -74,7 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reserve_event_id'], $
                         }
 
                         $pdo->commit();
-                        $reservationMessage = 'Rezerwacja została zapisana. Wybrane miejsca: ' . implode(', ', $selectedSeatsArray);
+                        $_SESSION['reservationMessage'] = 'Rezerwacja została zapisana. Wybrane miejsca: ' . implode(', ', $selectedSeatsArray);
+                        header('Location: index.php');
+                        exit;
                     }
                 }
             }
