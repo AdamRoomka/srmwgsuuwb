@@ -676,9 +676,51 @@ footer p {
 }
 
 .form-group select {
-    padding: 10px;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #fff;
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.event-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.event-actions form {
+  margin: 0;
+}
+
+.form-group select {
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.seat.selected-for-release {
+  background-color: #c0392b;
+  color: #fff;
+  border: 2px solid #922b21;
+}
+
+.my-reservations-list {
+  display: grid;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.seat.mine {
+  background-color: #2563eb;
+  color: #fff;
+  border: 1px solid #1d4ed8;
+}
+
+.seat-legend.mine {
+  background-color: #2563eb;
+  border: 1px solid #1d4ed8;
 }
