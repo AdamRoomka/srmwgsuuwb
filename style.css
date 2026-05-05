@@ -674,3 +674,11 @@ footer p {
     max-width: none;
   }
 }
+
+.form-group select {
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+}
