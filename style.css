@@ -724,3 +724,7 @@ footer p {
   background-color: #2563eb;
   border: 1px solid #1d4ed8;
 }
+
+.my-reservations-list .event-card form {
+    margin-top: 12px;
+}

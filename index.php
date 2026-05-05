@@ -49,6 +49,7 @@ try {
     require_once __DIR__ . '/actions/update_event.php'; // aktualizacja wydarzenia (tylko dla administratora)
     require_once __DIR__ . '/actions/delete_event.php'; // usuwanie wydarzenia (tylko dla administratora)
     require_once __DIR__ . '/actions/manage_seats.php'; // zarządzanie miejscami (tylko dla administratora)
+    require_once __DIR__ . '/actions/cancel_own_reservation.php'; // anulowanie własnej rezerwacji (tylko dla zalogowanych użytkowników)
 
     $userListStmt = $pdo->query("
         SELECT id, first_name, last_name, email
@@ -124,15 +125,18 @@ try {
                         <div class="my-reservations-list">
                             <?php foreach ($userReservations as $reservation): ?>
                                 <div class="event-card">
-                                    <h4>
-                                        <?php echo htmlspecialchars($reservation['event_name']); ?>
-                                    </h4>
+                                    <h4><?php echo htmlspecialchars($reservation['event_name']); ?></h4>
                                     <p><strong>Data:</strong>
-                                        <?php echo htmlspecialchars(formatDatePl($reservation['start_at'])); ?>
+                                        <?php echo htmlspecialchars(formatDatePl($reservation['start_at'])); ?></p>
+                                    <p><strong>Moje miejsca:</strong> <?php echo htmlspecialchars($reservation['seat_numbers']); ?>
                                     </p>
-                                    <p><strong>Moje miejsca:</strong>
-                                        <?php echo htmlspecialchars($reservation['seat_numbers']); ?>
-                                    </p>
+
+                                    <form method="post"
+                                        onsubmit="return confirm('Czy na pewno chcesz usunąć swoją rezerwację dla tego wydarzenia?');">
+                                        <input type="hidden" name="cancel_own_reservation" value="1">
+                                        <input type="hidden" name="event_id" value="<?php echo (int) $reservation['event_id']; ?>">
+                                        <button type="submit" class="btn btn-secondary">Usuń moją rezerwację</button>
+                                    </form>
                                 </div>
                             <?php endforeach; ?>
                         </div>
