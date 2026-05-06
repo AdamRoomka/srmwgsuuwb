@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeModalBtn = document.getElementById('closeReservationModal');
     const cancelReservationBtn = document.getElementById('cancelReservationBtn');
     const seatMap = document.getElementById('seatMap');
-    const seatCountInput = document.getElementById('seatCountInput');
     const selectedSeatsList = document.getElementById('selectedSeatsList');
     const selectedSeatsCount = document.getElementById('selectedSeatsCount');
     const modalEventTitle = document.getElementById('modalEventTitle');
@@ -46,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let selectedSeats = [];
     let occupiedSeats = [];
-    let maxSelectableSeats = 1;
     let currentEventId = null;
     let currentTotalSeats = 0;
     let adminSelectedSeats = [];
@@ -124,12 +122,8 @@ document.addEventListener('DOMContentLoaded', function () {
         currentTotalSeats = totalSeats;
         selectedSeats = [];
         occupiedSeats = parseOccupiedSeats(occupiedSeatsJson);
-        maxSelectableSeats = 1;
 
         modalEventTitle.textContent = 'Rezerwacja: ' + eventName;
-        seatCountInput.value = 1;
-        seatCountInput.min = 1;
-        seatCountInput.max = Math.max(1, availableSeats);
         reserveEventId.value = eventId;
         selectedSeatsInput.value = '';
 
@@ -150,24 +144,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    seatCountInput.addEventListener('input', function () {
-        let value = parseInt(this.value, 10) || 1;
-        const realMax = Math.max(1, parseInt(this.max, 10) || 1);
-
-        if (value < 1) value = 1;
-        if (value > realMax) value = realMax;
-
-        this.value = value;
-        maxSelectableSeats = value;
-
-        if (selectedSeats.length > maxSelectableSeats) {
-            selectedSeats = selectedSeats.slice(0, maxSelectableSeats);
-        }
-
-        updateSelectedSeatsInfo();
-        renderSeats();
-    });
-
     closeModalBtn.addEventListener('click', function () {
         modal.classList.remove('active');
     });
@@ -177,9 +153,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     reservationForm.addEventListener('submit', function (e) {
-        if (selectedSeats.length !== maxSelectableSeats) {
+        if (selectedSeats.length < 1) {
             e.preventDefault();
-            alert('Wybierz dokładnie ' + maxSelectableSeats + ' miejsc.');
+            alert('Wybierz przynajmniej jedno miejsce.');
             return;
         }
 
