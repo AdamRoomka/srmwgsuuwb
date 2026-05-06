@@ -10,13 +10,9 @@
             <input type="hidden" name="selected_seats" id="selectedSeatsInput">
 
             <div class="step-container">
-                <h3>Krok 1: Ile miejsc potrzebujesz?</h3>
-                <div class="form-group">
-                    <input type="number" id="seatCountInput" min="1" value="1">
-                </div>
 
                 <h2>Wybór miejsc w Auli</h2>
-                <h3>Krok 2: Kliknij na krzesła, aby je zająć</h3>
+                <h3>Kliknij na krzesła, aby je zająć</h3>
 
                 <div class="screen-indicator">SCENA</div>
 
