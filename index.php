@@ -1,165 +1,191 @@
-<!doctype html>
+<?php
+session_start();
+
+require_once __DIR__ . '/includes/functions.php'; // funkcje
+
+$host = '127.0.0.1';
+$dbname = 'uwb_rezerwacje';
+$user = 'root';
+$password = '';
+$port = '3306';
+
+$events = [];
+$occupiedSeatsByEvent = [];
+$userReservations = [];
+$usersForAdminSeatAssignment = [];
+$dbError = null;
+$loginError = null;
+$reservationMessage = $_SESSION['reservationMessage'] ?? null;
+$reservationError = $_SESSION['reservationError'] ?? null;
+unset($_SESSION['reservationMessage'], $_SESSION['reservationError']);
+$currentUser = $_SESSION['user'] ?? null;
+
+try {
+    $pdo = new PDO(
+        "mysql:
+            host=$host;
+            port=$port;
+            dbname=$dbname;
+        charset=utf8mb4",
+        $user,
+        $password,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]
+    );
+
+    if (isset($_GET['logout'])) {
+        unset($_SESSION['user']);
+        header('Location: index.php');
+        exit;
+    }
+
+    require_once __DIR__ . '/actions/login.php'; // logowanie
+    $currentUser = $_SESSION['user'] ?? null;
+    require_once __DIR__ . '/actions/create_event.php'; // dodawanie wydarzenia (tylko dla administratora)
+    require_once __DIR__ . '/actions/reserve_seats.php'; // rezerwacja miejsc (tylko dla zalogowanych użytkowników)
+    require_once __DIR__ . '/queries/events.php'; // pobieranie wydarzeń i zajętych miejsc
+    require_once __DIR__ . '/actions/update_event.php'; // aktualizacja wydarzenia (tylko dla administratora)
+    require_once __DIR__ . '/actions/delete_event.php'; // usuwanie wydarzenia (tylko dla administratora)
+    require_once __DIR__ . '/actions/manage_seats.php'; // zarządzanie miejscami (tylko dla administratora)
+    require_once __DIR__ . '/actions/cancel_own_reservation.php'; // anulowanie własnej rezerwacji (tylko dla zalogowanych użytkowników)
+
+    $userListStmt = $pdo->query("
+        SELECT id, first_name, last_name, email
+        FROM users
+        ORDER BY first_name ASC, last_name ASC, email ASC
+    ");
+    $usersForAdminSeatAssignment = $userListStmt->fetchAll();
+
+    if ($currentUser) {
+        $userReservationsStmt = $pdo->prepare("
+        SELECT 
+            e.id AS event_id,
+            e.name AS event_name,
+            e.start_at,
+            GROUP_CONCAT(os.seat_number ORDER BY os.seat_number ASC SEPARATOR ', ') AS seat_numbers
+        FROM occupied_seats os
+        JOIN events e ON e.id = os.event_id
+        WHERE os.user_id = :user_id
+          AND os.status = 'AKTYWNA'
+        GROUP BY e.id, e.name, e.start_at
+        ORDER BY e.start_at ASC
+    ");
+        $userReservationsStmt->execute([
+            'user_id' => $currentUser['id']
+        ]);
+        $userReservations = $userReservationsStmt->fetchAll();
+    }
+
+} catch (PDOException $e) {
+    if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    $dbError = $e->getMessage();
+}
+?>
+
+<!DOCTYPE html>
 <html lang="pl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Rezerwacji - Aula Główna</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        window.currentUserId = <?php echo $currentUser ? (int) $currentUser['id'] : 'null'; ?>;
+    </script>
+    <script src="scripts.js"></script>
+</head>
+
+<body>
     <header>
-      <div class="header-container">
-        <div class="header-left">
-          <a href="/" class="logo-box">
-            <img
-              src="./IMG/uwb_wilno_logo.png"
-              alt="Filia UwB w Wilnie"
-              class="logo"
-            />
-          </a>
-          <h1>System Rezerwacji miejsc w głównej sali Uniwersytetu UWB</h1>
+        <div class="header-container">
+            <div class="header-left">
+                <a href="/" class="logo-box">
+                    <img src="./IMG/uwb_wilno_logo.png" alt="Filia UwB w Wilnie" class="logo" />
+                </a>
+                <h1>System Rezerwacji miejsc w głównej sali Uniwersytetu UWB</h1>
+            </div>
         </div>
-        <div class="header-right">
-          <button class="help-btn">?</button>
-        </div>
-      </div>
+        <?php require __DIR__ . '/views/partials/auth_section.php'; ?>
+        <? // logowanie i wyświetlanie informacji o aktualnym użytkowniku ?>
     </header>
 
-    <main class="container">
-      <section id="view-events" class="view active">
-        <h2>Wybierz wydarzenie</h2>
-        <div class="events-grid">
-          <div
-            class="event-card"
-            onclick="startReservation('Wykład Inauguracyjny')"
-          >
-            <h3>Wykład Inauguracyjny</h3>
-            <p><strong>Data:</strong> 20 Marca 2026</p>
-            <p>Uroczyste rozpoczęcie semestru letniego.</p>
-            <button class="btn btn-primary">Rezerwuj</button>
-          </div>
-          <div class="event-card" onclick="startReservation('Konferencja AI')">
-            <h3>Konferencja AI</h3>
-            <p><strong>Data:</strong> 5 Kwietnia 2026</p>
-            <p>Przyszłość sztucznej inteligencji.</p>
-            <button class="btn btn-primary">Rezerwuj</button>
-          </div>
-          <div
-            class="event-card"
-            onclick="startReservation('Gala Absolwentów')"
-          >
-            <h3>Gala Absolwentów</h3>
-            <p><strong>Data:</strong> 15 Maja 2026</p>
-            <p>Rozdanie dyplomów dla rocznika 2025/2026.</p>
-            <button class="btn btn-primary">Rezerwuj</button>
-          </div>
+    <div class="container">
+        <div class="view active">
+            <h2>Wybierz wydarzenie</h2>
+            <?php if ($currentUser): ?>
+                <div class="info-box">
+                    <h3>Moje rezerwacje</h3>
+
+                    <?php if (!empty($userReservations)): ?>
+                        <div class="my-reservations-list">
+                            <?php foreach ($userReservations as $reservation): ?>
+                                <div class="event-card">
+                                    <h4><?php echo htmlspecialchars($reservation['event_name']); ?></h4>
+                                    <p><strong>Data:</strong>
+                                        <?php echo htmlspecialchars(formatDatePl($reservation['start_at'])); ?></p>
+                                    <p><strong>Moje miejsca:</strong> <?php echo htmlspecialchars($reservation['seat_numbers']); ?>
+                                    </p>
+
+                                    <form method="post"
+                                        onsubmit="return confirm('Czy na pewno chcesz usunąć swoją rezerwację dla tego wydarzenia?');">
+                                        <input type="hidden" name="cancel_own_reservation" value="1">
+                                        <input type="hidden" name="event_id" value="<?php echo (int) $reservation['event_id']; ?>">
+                                        <button type="submit" class="btn btn-secondary">Usuń moją rezerwację</button>
+                                    </form>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <p>Nie masz jeszcze żadnych rezerwacji przypisanych do Twojego konta.</p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+            <?php if ($dbError): ?>
+                <div class="error-box">
+                    <h3>Błąd połączenia z bazą danych</h3>
+                    <p>Sprawdź konfigurację połączenia oraz czy baza <strong>uwb_rezerwacje</strong> istnieje.</p>
+                    <p><?php echo htmlspecialchars($dbError); ?></p>
+                </div>
+            <?php elseif (empty($events)): ?>
+                <div class="info-box">
+                    <p>Brak wydarzeń w bazie danych.</p>
+                </div>
+            <?php else: ?>
+                <?php require __DIR__ . '/views/partials/messages.php'; ?>
+                <? // wyświetlanie komunikatów o rezerwacji lub błędach rezerwacji ?>
+
+                <?php if ($currentUser && $currentUser['role'] === 'ADMINISTRATOR'): ?>
+                    <div style="margin: 20px 0;">
+                        <button type="button" class="btn btn-primary" id="openCreateEventModal">
+                            Dodaj nowe wydarzenie
+                        </button>
+                    </div>
+                <?php endif; ?>
+
+
+
+                <?php require __DIR__ . '/views/partials/create_event_modal.php'; ?>
+                <? // modal dodawania wydarzenia (tylko dla administratora) ?>
+
+                <div class="events-grid">
+                    <?php require __DIR__ . '/views/partials/event_card.php'; ?>
+                    <? // karty wydarzeń z przyciskiem rezerwacji (tylko dla zalogowanych użytkowników) ?>
+                </div>
+
+                <?php require __DIR__ . '/views/partials/reservation_modal.php'; ?>
+                <? // modal rezerwacji miejsc (tylko dla zalogowanych użytkowników) ?>
+            <?php endif; ?>
         </div>
-      </section>
-
-      <section id="view-tickets" class="view">
-        <h2 id="selected-event-title">Wydarzenie</h2>
-        <div class="step-container">
-          <h3>Krok 1: Ile miejsc potrzebujesz?</h3>
-          <div class="form-group">
-            <label for="ticket-count">Liczba osób:</label>
-            <input type="number" id="ticket-count" min="1" max="10" value="1" />
-          </div>
-          <button class="btn btn-secondary" onclick="showView('view-events')">
-            Wróć
-          </button>
-          <button class="btn btn-primary" onclick="showView('view-seats')">
-            Dalej: Wybierz miejsca
-          </button>
-        </div>
-      </section>
-
-      <section id="view-seats" class="view">
-        <h2>Wybór miejsc w Auli</h2>
-        <div class="step-container">
-          <h3>Krok 2: Kliknij na krzesła, aby je zająć</h3>
-
-          <div class="screen-indicator">SCENA</div>
-
-          <div class="seat-map" id="seat-map"></div>
-
-          <div class="legend">
-            <span class="seat-legend available"></span> Wolne
-            <span class="seat-legend selected"></span> Wybrane
-            <span class="seat-legend occupied"></span> Zajęte
-          </div>
-
-          <div class="action-buttons">
-            <button
-              class="btn btn-secondary"
-              onclick="showView('view-tickets')"
-            >
-              Wróć
-            </button>
-            <button class="btn btn-primary" onclick="finishReservation()">
-              Potwierdź rezerwację
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section id="view-success" class="view">
-        <div class="step-container" style="text-align: center">
-          <h2 style="color: #4caf50">Rezerwacja zakończona sukcesem!</h2>
-          <p>Twoje miejsca zostały zapisane w systemie.</p>
-          <button class="btn btn-primary" onclick="showView('view-events')">
-            Powrót do strony głównej
-          </button>
-        </div>
-      </section>
-    </main>
+    </div>
 
     <footer>
-      <p>&copy; 2026 Filia UwB w Wilnie</p>
+        <p>Projekt zespołowy: System rezerwacji miejsc UWB</p>
     </footer>
+</body>
 
-    <script>
-      function showView(viewId) {
-        const views = document.querySelectorAll(".view");
-        views.forEach((view) => view.classList.remove("active"));
-
-        document.getElementById(viewId).classList.add("active");
-      }
-
-      function startReservation(eventName) {
-        document.getElementById("selected-event-title").innerText =
-          "Rezerwacja: " + eventName;
-        showView("view-tickets");
-        generateSeats();
-      }
-
-      function generateSeats() {
-        const seatMap = document.getElementById("seat-map");
-        seatMap.innerHTML = "";
-
-        for (let i = 0; i < 50; i++) {
-          const seat = document.createElement("div");
-          seat.classList.add("seat");
-
-          if (Math.random() < 0.2) {
-            seat.classList.add("occupied");
-          } else {
-            seat.onclick = function () {
-              this.classList.toggle("selected");
-            };
-          }
-          seatMap.appendChild(seat);
-        }
-      }
-
-      function finishReservation() {
-        const selectedSeats =
-          document.querySelectorAll(".seat.selected").length;
-        if (selectedSeats === 0) {
-          alert("Wybierz przynajmniej jedno miejsce przed potwierdzeniem!");
-          return;
-        }
-        showView("view-success");
-      }
-    </script>
-  </body>
 </html>
