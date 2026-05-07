@@ -93,11 +93,13 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Rezerwacji - Aula Główna</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/seat-map.css">
     <script>
         window.currentUserId = <?php echo $currentUser ? (int) $currentUser['id'] : 'null'; ?>;
     </script>
-    <script src="scripts.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/seat-map.js"></script>
 </head>
 
 <body>

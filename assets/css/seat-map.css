@@ -1,0 +1,117 @@
+.seat-map,
+#manageSeatMap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 16px 24px;
+    box-sizing: border-box;
+}
+
+.hall-stage {
+    width: 260px;
+    margin: 0 auto 24px;
+    padding: 10px 20px;
+    border: 4px solid #d62828;
+    color: #d62828;
+    text-align: center;
+    font-weight: 700;
+    font-size: 28px;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.hall-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    min-width: max-content;
+    padding: 0 24px;
+}
+
+.hall-row-grid {
+    display: grid;
+    gap: 6px;
+    justify-content: start;
+    align-items: center;
+}
+
+.seat-spacer {
+    width: 38px;
+    height: 38px;
+    visibility: hidden;
+}
+
+.seat {
+    width: 38px;
+    height: 38px;
+    border: 3px solid #111;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+    border-radius: 6px;
+}
+
+.seat-legend {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin: 0 5px 0 15px;
+  vertical-align: middle;
+}
+
+.seat,
+.seat-legend {
+    background: #4caf50;
+}
+
+.seat:hover:not(.occupied),
+.seat-legend.selected,
+.seat.selected {
+    background: #f4c542;
+    border-color: #c89b17;
+    color: #111;
+    transform: scale(1.08);
+}
+
+.seat-legend.occupied,
+.seat.occupied {
+    background: #9ca3af;
+    border-color: #6b7280;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.seat.mine,
+.seat-legend.mine,
+.seat.occupied.mine {
+    background: #2563eb;
+    border-color: #1d4ed8;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.seat.legend {
+    cursor: default;
+}
+
+.seat.selected-for-release {
+    background: #c0392b;
+    border-color: #922b21;
+    color: #fff;
+}
+
+.legend {
+  text-align: center;
+  margin-bottom: 30px;
+}
