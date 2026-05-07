@@ -387,4 +387,26 @@ document.addEventListener('DOMContentLoaded', function () {
             manageSeatsActionInput.value = 'reserve';
         });
     }
+
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.pencil');
+        const allModals = document.querySelectorAll('.buttonsEventModalClass');
+    
+        if (btn) {
+            e.preventDefault();
+            const card = btn.closest('.event-card');
+            const modal = card.querySelector('.buttonsEventModalClass');
+            allModals.forEach(m => {
+                if (m !== modal) m.style.display = 'none';
+            });
+            const isFlex = window.getComputedStyle(modal).display === 'flex';
+            modal.style.display = isFlex ? 'none' : 'flex';
+        } else {
+            allModals.forEach(modal => {
+                if (modal.style.display === 'flex' && !e.target.closest('.buttonsEventModalClass')) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    });
 });
