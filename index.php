@@ -15,9 +15,10 @@ $userReservations = [];
 $usersForAdminSeatAssignment = [];
 $dbError = null;
 $loginError = null;
-$reservationMessage = $_SESSION['reservationMessage'] ?? null;
-$reservationError = $_SESSION['reservationError'] ?? null;
-unset($_SESSION['reservationMessage'], $_SESSION['reservationError']);
+$reservationMessage = $_SESSION['reservationMessage'] ?? '';
+$reservationError = $_SESSION['reservationError'] ?? '';
+$_SESSION['reservationMessage'] = '';
+$_SESSION['reservationError'] = '';
 $currentUser = $_SESSION['user'] ?? null;
 
 try {

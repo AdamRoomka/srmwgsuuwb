@@ -17,6 +17,7 @@ document.addEventListener('app:ready', function () {
     const selectedSeatsInput = document.getElementById('selectedSeatsInput');
     const selectedSeatsList = document.getElementById('selectedSeatsList');
     const selectedSeatsCount = document.getElementById('selectedSeatsCount');
+    const reserveEventId = document.getElementById('reserveEventId');
 
     const manageSeatsEventId = document.getElementById('manageSeatsEventId');
     const manageSeatsSelectedSeatsInput = document.getElementById('manageSeatsSelectedSeatsInput');
@@ -188,6 +189,7 @@ document.addEventListener('app:ready', function () {
             currentTotalSeats = parseInt(this.dataset.totalSeats || '0', 10);
             occupiedSeats = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
 
+            if (reserveEventId) reserveEventId.value = this.dataset.eventId || '';
             updateSelectedSeatsInfo();
             renderSeats();
             App.openModal(reservationModal);

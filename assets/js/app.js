@@ -128,4 +128,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    const toastNotification = document.getElementById('toastNotification');
+    const closeToast = document.getElementById('closeToast');
+
+    if (closeToast && toastNotification) {
+        closeToast.addEventListener('click', function () {
+            toastNotification.remove();
+        });
+    }
+
+    if (toastNotification) {
+        setTimeout(function () {
+            toastNotification.remove();
+        }, 5000);
+    }
 });
