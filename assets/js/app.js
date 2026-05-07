@@ -1,7 +1,9 @@
 window.App = window.App || {};
 
 document.addEventListener('DOMContentLoaded', function () {
-    App.currentUserId = window.appData?.currentUserId ?? null;
+    App.currentUserId = window.currentUserId ?? window.appData?.currentUserId ?? null;
+    window.appData = window.appData || {};
+    window.appData.currentUserId = App.currentUserId;
 
     App.parseJsonSafely = function (value, fallback = []) {
         try {

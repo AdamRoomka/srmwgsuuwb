@@ -98,6 +98,8 @@ try {
     <link rel="stylesheet" href="assets/css/seat-map.css">
     <script>
         window.currentUserId = <?php echo $currentUser ? (int) $currentUser['id'] : 'null'; ?>;
+        window.appData = window.appData || {};
+        window.appData.currentUserId = window.currentUserId;
     </script>
     <script src="assets/js/app.js"></script>
     <script src="assets/js/seat-map.js"></script>

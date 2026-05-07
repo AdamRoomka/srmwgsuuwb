@@ -124,6 +124,7 @@ document.addEventListener('app:ready', function () {
 
                 const occupiedSeat = occupiedSource.find(item => parseInt(item.seat_number, 10) === seatNumber);
                 const isOccupied = !!occupiedSeat;
+                // console.log(`Rendering seat ${seatNumber}: occupied=${isOccupied}, occupiedSeatUserId=${occupiedSeat ? occupiedSeat.user_id : 'N/A'}, currentUserId=${currentUserId}`);
                 const isMine = isOccupied && currentUserId !== null && parseInt(occupiedSeat.user_id, 10) === currentUserId;
                 const isSelected = selectedSource.includes(seatNumber);
 
