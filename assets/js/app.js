@@ -97,4 +97,35 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.dispatchEvent(new CustomEvent('app:ready'));
+
+    const createEventModal = document.getElementById('createEventModal');
+    const openCreateEventModal = document.getElementById('openCreateEventModal');
+    const closeCreateEventModal = document.getElementById('closeCreateEventModal');
+    const cancelCreateEventBtn = document.getElementById('cancelCreateEventBtn');
+
+    if (openCreateEventModal && createEventModal) {
+        openCreateEventModal.addEventListener('click', function () {
+            App.openModal(createEventModal);
+        });
+    }
+
+    if (closeCreateEventModal && createEventModal) {
+        closeCreateEventModal.addEventListener('click', function () {
+            App.closeModal(createEventModal);
+        });
+    }
+
+    if (cancelCreateEventBtn && createEventModal) {
+        cancelCreateEventBtn.addEventListener('click', function () {
+            App.closeModal(createEventModal);
+        });
+    }
+
+    if (createEventModal) {
+        createEventModal.addEventListener('click', function (e) {
+            if (e.target === createEventModal) {
+                App.closeModal(createEventModal);
+            }
+        });
+    }
 });
