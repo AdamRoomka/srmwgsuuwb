@@ -32,7 +32,7 @@
 
                     <div class="form-group">
                         <label for="event_total_seats">Liczba miejsc</label>
-                        <input type="number" id="event_total_seats" name="event_total_seats" min="1" required>
+                        <input type="number" id="event_total_seats" name="event_total_seats" min="1" max="100" value="90" required>
                     </div>
 
                     <div class="form-group">
@@ -88,7 +88,7 @@
 
                     <div class="form-group">
                         <label for="edit_event_total_seats">Liczba miejsc</label>
-                        <input type="number" id="edit_event_total_seats" name="event_total_seats" min="1" required>
+                        <input type="number" id="edit_event_total_seats" name="event_total_seats" min="1" max="100" value="90" required>
                     </div>
 
                     <div class="form-group">

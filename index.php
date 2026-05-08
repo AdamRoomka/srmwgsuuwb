@@ -96,6 +96,7 @@ try {
     <title>System Rezerwacji - Aula Główna</title>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/seat-map.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
         window.currentUserId = <?php echo $currentUser ? (int) $currentUser['id'] : 'null'; ?>;
         window.appData = window.appData || {};
@@ -114,33 +115,96 @@ try {
                 </a>
                 <h1>System Rezerwacji miejsc w głównej sali Uniwersytetu UWB</h1>
             </div>
+            <?php require __DIR__ . '/views/partials/auth_section.php'; ?>
         </div>
-        <?php require __DIR__ . '/views/partials/auth_section.php'; ?>
-        <? // logowanie i wyświetlanie informacji o aktualnym użytkowniku ?>
     </header>
 
     <div class="container">
-        <div class="view active">
-            <h2>Wybierz wydarzenie</h2>
-            <?php if ($currentUser): ?>
-                <div class="info-box">
-                    <h3>Moje rezerwacje</h3>
+        <?php if ($currentUser && $currentUser['role'] === 'ADMINISTRATOR'): ?>
+                        <div style="position: fixed; bottom: 20px; right: 20px;">
+                            <button type="button" class="btn btn-primary" style="border-radius: 40px; font-size: 20px; padding: 13px 18px;" id="openCreateEventModal">
+                            <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    <?php endif; ?>
+        <div class="row view active">
+            <div class="main">
+                <h2>Wybierz wydarzenie</h2>
+                <?php if ($dbError): ?>
+                    <div class="error-box">
+                        <h3>Błąd połączenia z bazą danych</h3>
+                        <p>Sprawdź konfigurację połączenia oraz czy baza <strong>uwb_rezerwacje</strong> istnieje.</p>
+                        <p><?php echo htmlspecialchars($dbError); ?></p>
+                    </div>
+                <?php elseif (empty($events)): ?>
+                    <div class="info-box">
+                        <p>Brak wydarzeń w bazie danych.</p>
+                    </div>
+                <?php else: ?>
+                    <?php require __DIR__ . '/views/partials/messages.php'; ?>
+
+                    
+
+
+
+                    <?php require __DIR__ . '/views/partials/create_event_modal.php'; ?>
+                    <? // modal dodawania wydarzenia (tylko dla administratora) ?>
+
+                    <div class="events-grid">
+                        <?php require __DIR__ . '/views/partials/event_card.php'; ?>
+                        <? // karty wydarzeń z przyciskiem rezerwacji (tylko dla zalogowanych użytkowników) ?>
+                    </div>
+
+                    <?php require __DIR__ . '/views/partials/reservation_modal.php'; ?>
+                    <? // modal rezerwacji miejsc (tylko dla zalogowanych użytkowników) ?>
+                <?php endif; ?>
+
+            </div>
+
+            <div class="info-box sidebar">
+                <h2>Moje rezerwacje</h2>
+                <?php if ($currentUser): ?>
 
                     <?php if (!empty($userReservations)): ?>
                         <div class="my-reservations-list">
                             <?php foreach ($userReservations as $reservation): ?>
                                 <div class="event-card">
-                                    <h4><?php echo htmlspecialchars($reservation['event_name']); ?></h4>
-                                    <p><strong>Data:</strong>
-                                        <?php echo htmlspecialchars(formatDatePl($reservation['start_at'])); ?></p>
-                                    <p><strong>Moje miejsca:</strong> <?php echo htmlspecialchars($reservation['seat_numbers']); ?>
-                                    </p>
+                                    <div class="top">
+                                        <div class="title_and_data">
+                                            <i class="fa-regular fa-calendar-check <?php echo $statusClass; ?> icon"></i>
+                                            <div style=" padding: 5px;">
+                                                <h4>
+                                                    <?php echo htmlspecialchars($reservation['event_name']); ?>
+                                                </h4>
+                                                <p>
+                                                    <?php echo htmlspecialchars(formatDatePl($reservation['start_at'])); ?>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="status-badge success">
+                                            <?php echo htmlspecialchars(statusLabel($event['status'])); ?>
+                                        </div>
+                                    </div>
 
-                                    <form method="post"
+                                    <div class="place">Moje miejsca:</div>
+                                    <div class="seat-card">
+                                    <?php 
+                                    $seats = explode(',', $reservation['seat_numbers']); 
+
+                                    foreach ($seats as $seat): 
+                                        $cleanSeat = trim($seat); 
+                                        ?>
+                                        <div class="seat-item">
+                                            <?php echo htmlspecialchars($cleanSeat); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                    </div>
+
+                                    <form class="remove_reservation" method="post"
                                         onsubmit="return confirm('Czy na pewno chcesz usunąć swoją rezerwację dla tego wydarzenia?');">
                                         <input type="hidden" name="cancel_own_reservation" value="1">
                                         <input type="hidden" name="event_id" value="<?php echo (int) $reservation['event_id']; ?>">
-                                        <button type="submit" class="btn btn-secondary">Usuń moją rezerwację</button>
+                                        <button type="submit" class="btn btn-secondary"><i class="fa-regular fa-trash-can"></i> Usuń moją rezerwację</button>
                                     </form>
                                 </div>
                             <?php endforeach; ?>
@@ -148,43 +212,9 @@ try {
                     <?php else: ?>
                         <p>Nie masz jeszcze żadnych rezerwacji przypisanych do Twojego konta.</p>
                     <?php endif; ?>
-                </div>
-            <?php endif; ?>
-            <?php if ($dbError): ?>
-                <div class="error-box">
-                    <h3>Błąd połączenia z bazą danych</h3>
-                    <p>Sprawdź konfigurację połączenia oraz czy baza <strong>uwb_rezerwacje</strong> istnieje.</p>
-                    <p><?php echo htmlspecialchars($dbError); ?></p>
-                </div>
-            <?php elseif (empty($events)): ?>
-                <div class="info-box">
-                    <p>Brak wydarzeń w bazie danych.</p>
-                </div>
-            <?php else: ?>
-                <?php require __DIR__ . '/views/partials/messages.php'; ?>
-                <? // wyświetlanie komunikatów o rezerwacji lub błędach rezerwacji ?>
 
-                <?php if ($currentUser && $currentUser['role'] === 'ADMINISTRATOR'): ?>
-                    <div style="margin: 20px 0;">
-                        <button type="button" class="btn btn-primary" id="openCreateEventModal">
-                            Dodaj nowe wydarzenie
-                        </button>
-                    </div>
                 <?php endif; ?>
-
-
-
-                <?php require __DIR__ . '/views/partials/create_event_modal.php'; ?>
-                <? // modal dodawania wydarzenia (tylko dla administratora) ?>
-
-                <div class="events-grid">
-                    <?php require __DIR__ . '/views/partials/event_card.php'; ?>
-                    <? // karty wydarzeń z przyciskiem rezerwacji (tylko dla zalogowanych użytkowników) ?>
-                </div>
-
-                <?php require __DIR__ . '/views/partials/reservation_modal.php'; ?>
-                <? // modal rezerwacji miejsc (tylko dla zalogowanych użytkowników) ?>
-            <?php endif; ?>
+            </div>
         </div>
     </div>
 

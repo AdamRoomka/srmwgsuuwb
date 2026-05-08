@@ -76,7 +76,6 @@ header h1 {
 .container {
   width: 80%;
   margin: 20px auto;
-  overflow: hidden;
   padding: 20px;
   flex: 1;
 }
@@ -86,7 +85,8 @@ header h1 {
 }
 
 .view.active {
-  display: block;
+  display: flex;
+  gap: 10px;
   animation: fadeIn 0.4s ease-in-out;
 }
 
@@ -102,6 +102,14 @@ header h1 {
   }
 }
 
+.main {
+  width: 70%;
+}
+
+.sidebar {
+  width: 30%;
+}
+
 h2 {
   color: #532272;
 }
@@ -109,37 +117,110 @@ h2 {
 .events-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 10px;
   margin-top: 20px;
+  align-items: stretch;
 }
 
 .event-card {
+  position: relative;
   background: #fff;
-  border: 1px solid #ddd;
-  padding: 20px;
-  border-radius: 8px;
+  padding: 15px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  cursor: default;
   transition:
-    transform 0.2s,
+    visibility 0.2s,
+    display 0.2s,
     box-shadow 0.2s;
-  text-align: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  gap: 5px;
 }
 
 .event-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  /* transform: translateY(-5px); */
+  box-shadow: 0 8px 15px #f8f9fa;
   border-color: #532272;
+}
+
+.event-card .pencil {
+  position: absolute;
+  top: -16px;
+  right: -10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s, transform 0.2s;
+  padding: 10px;
+  border-radius: 40px;
+  border: 1px solid rgba(128, 128, 128, 0.178);
+  background-color: #fff;
+  color: #48296a;
+  cursor: pointer;
+}
+
+.event-card:hover .pencil {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pencil:hover {
+  background-color: #48296a;
+  color: #fff;
+}
+
+.event-card .top {
+  display: flex;
+  justify-content: space-between;
 }
 
 .event-card h3 {
   color: #532272;
+  padding-top: 10px;
+}
+
+.event-card .description {
   margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(207, 207, 207, 0.459);
 }
 
 .event-card p {
-  margin-bottom: 15px;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.event-card p i {
+  color: #4b1d6b;
+}
+
+.event-card .title_and_data {
+  display: flex;
+}
+
+.event-card .place {
+  font-weight: 500;
+}
+
+.icon {
+  font-size: 30px;
+  padding: 10px 15px;
+  border-radius: 10px;
+}
+
+.planned.icon {
+  background: #efe7f6;
+  color: #4b1d6b;
+}
+
+.closed.icon {
+  background: #FFF4D6;
+  color: #D98C00;
+}
+
+.cancelled.icon {
+  background: #FFE5E5;
+  color: #E53935;
 }
 
 .step-container {
@@ -188,6 +269,41 @@ h2 {
   transition: 0.3s;
 }
 
+.btn-secondary {
+  background: #ddd;
+  color: #333;
+  margin-right: 10px;
+}
+
+.btn-secondary:hover {
+  background: #ccc;
+}
+
+.btn-reserve {
+  width: 100%;
+  background-color: #48296a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-reserve i {
+  position: absolute;
+  right: 20px;
+  font-size: 0.9rem;
+}
+
+.btn-reserve:hover {
+  background-color: #371e52;
+}
+
 .btn-primary {
   background: #48296a;
   color: #fff;
@@ -197,14 +313,25 @@ h2 {
   background: #371e52;
 }
 
-.btn-secondary {
-  background: #ddd;
-  color: #333;
-  margin-right: 10px;
+.buttonsEventModalClass {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 21px;
+  right: -1px;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid gray;
+  z-index: 10;
+  border-radius: 10px 0 10px 10px;
 }
 
-.btn-secondary:hover {
-  background: #ccc;
+.buttonsEventModalClass button {
+  background: none;
+  border: none;
+  text-align: start;
+  padding: 5px;
+  width: 100%;
 }
 
 footer {
@@ -226,6 +353,11 @@ footer p {
   align-items: center;
   gap: 20px;
   flex-wrap: wrap;
+}
+
+.header-user {
+  display: flex;
+  gap: 10px;
 }
 
 .top-auth {
@@ -258,7 +390,7 @@ footer p {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   padding: 10px 14px;
-  border-radius: 999px;
+  border-radius: 10px;
 }
 
 .user-role {
@@ -272,7 +404,8 @@ footer p {
   font-weight: 700;
   padding: 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
+  border-radius: 40px;
+  align-content: center;
 }
 
 .login-error {
@@ -285,14 +418,8 @@ footer p {
   text-align: right;
 }
 
-.error-box,
-.info-box {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-left: 4px solid #a12c4a;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 20px 0;
+.error-box {
+  text-align: center;
 }
 
 .info-box {
@@ -306,6 +433,7 @@ footer p {
   font-size: 12px;
   font-weight: 700;
   margin-bottom: 12px;
+  align-content: center;
 }
 
 .status-badge.planned {
@@ -313,20 +441,40 @@ footer p {
   color: #4b1d6b;
 }
 
+.status-badge.success {
+  background: #E6F7EC;
+  color: #2EAD62;
+}
+
 .status-badge.closed {
-  background: #fff4db;
-  color: #946200;
+  background: #FFF4D6;
+  color: #D98C00;
 }
 
 .status-badge.cancelled {
-  background: #fdecef;
-  color: #a12c4a;
+  background: #FFE5E5;
+  color: #E53935;
 }
 
 .blocked-msg {
-  color: #a12c4a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFE5E5;
+  color: #E53935;
   font-weight: 700;
   margin-top: 10px;
+  padding: 7px;
+  border-radius: 10px;
+}
+
+.blocked-msg i {
+  color: #E53935 !important;
+  border: 2px solid #E53935;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bolder;
+  font-size: 16px;
 }
 
 .reserve-note {
@@ -344,6 +492,27 @@ footer p {
   .login-form-inline {
     justify-content: flex-start;
   }
+}
+
+.seat-card {
+  display: flex;
+  gap: 10px;
+}
+
+.seat-card .seat-item {
+  padding: 5px 10px;
+  background-color: #efe7f670;
+  border-radius: 40px;
+  color: #4b1d6b;
+  font-size: 14px;
+}
+
+.remove_reservation button {
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #995cc3;
+  color: #4b1d6b;
+  gap: 5px;
 }
 
 .reservation-modal {
@@ -541,6 +710,7 @@ footer p {
   gap: 10px;
   flex-wrap: wrap;
   margin-top: 12px;
+  justify-content: center;
 }
 
 .event-actions form {
@@ -559,4 +729,12 @@ footer p {
   display: grid;
   gap: 15px;
   margin-top: 15px;
+  gap: 10px;
+  margin-top: 20px;
+  position: sticky;
+  top: 20px;
+}
+
+.my-reservations-list .event-card form {
+  margin-top: 12px;
 }
