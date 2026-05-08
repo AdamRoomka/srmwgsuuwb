@@ -15,9 +15,10 @@ $userReservations = [];
 $usersForAdminSeatAssignment = [];
 $dbError = null;
 $loginError = null;
-$reservationMessage = $_SESSION['reservationMessage'] ?? null;
-$reservationError = $_SESSION['reservationError'] ?? null;
-unset($_SESSION['reservationMessage'], $_SESSION['reservationError']);
+$reservationMessage = $_SESSION['reservationMessage'] ?? '';
+$reservationError = $_SESSION['reservationError'] ?? '';
+$_SESSION['reservationMessage'] = '';
+$_SESSION['reservationError'] = '';
 $currentUser = $_SESSION['user'] ?? null;
 
 try {
@@ -93,12 +94,16 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Rezerwacji - Aula Główna</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/seat-map.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <script>
         window.currentUserId = <?php echo $currentUser ? (int) $currentUser['id'] : 'null'; ?>;
+        window.appData = window.appData || {};
+        window.appData.currentUserId = window.currentUserId;
     </script>
-    <script src="scripts.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/seat-map.js"></script>
 </head>
 
 <body>

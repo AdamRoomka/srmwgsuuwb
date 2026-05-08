@@ -194,15 +194,13 @@ h2 {
   color: #4b1d6b;
 }
 
-.event-card .title_and_data{
+.event-card .title_and_data {
   display: flex;
 }
 
-.event-card .place{
+.event-card .place {
   font-weight: 500;
 }
-
-
 
 .icon {
   font-size: 30px;
@@ -224,8 +222,6 @@ h2 {
   background: #FFE5E5;
   color: #E53935;
 }
-
-
 
 .step-container {
   background: #fff;
@@ -255,75 +251,6 @@ h2 {
   border-radius: 5px;
   font-weight: bold;
   letter-spacing: 2px;
-}
-
-.seat-map {
-  display: grid;
-  grid-template-columns: repeat(10, 40px);
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 30px;
-  margin-top: 20px;
-}
-
-.seat {
-  width: 40px;
-  height: 40px;
-  background-color: #4caf50;
-  border-radius: 8px 8px 4px 4px;
-  cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border 0.18s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  border: 2px solid transparent;
-}
-
-.seat:hover:not(.occupied):not(.selected) {
-  transform: scale(1.08);
-}
-
-.seat.selected {
-  background-color: #4caf50;
-  transform: scale(1.18);
-  border: 2px solid #1f5f2b;
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.25);
-}
-
-.seat.occupied {
-  background-color: #999;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.legend {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.seat-legend {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  margin: 0 5px 0 15px;
-  vertical-align: middle;
-}
-
-.seat-legend.available {
-  background-color: #4caf50;
-}
-
-.seat-legend.selected {
-  background-color: #e8491d;
-}
-
-.seat-legend.occupied {
-  background-color: #999;
 }
 
 .action-buttons {
@@ -567,12 +494,12 @@ footer p {
   }
 }
 
-.seat-card{
+.seat-card {
   display: flex;
   gap: 10px;
 }
 
-.seat-card .seat-item{
+.seat-card .seat-item {
   padding: 5px 10px;
   background-color: #efe7f670;
   border-radius: 40px;
@@ -580,7 +507,7 @@ footer p {
   font-size: 14px;
 }
 
-.remove_reservation button{
+.remove_reservation button {
   width: 100%;
   background-color: #fff;
   border: 1px solid #995cc3;
@@ -651,70 +578,6 @@ footer p {
   margin-bottom: 0;
 }
 
-.seat-map {
-  display: grid;
-  grid-template-columns: repeat(10, 40px);
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 30px;
-  margin-top: 20px;
-}
-
-.seat {
-  width: 40px;
-  height: 40px;
-  background-color: #4caf50;
-  border-radius: 8px 8px 4px 4px;
-  cursor: pointer;
-  transition: 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.seat:hover:not(.occupied) {
-  background-color: #45a049;
-  transform: scale(1.08);
-}
-
-.seat.selected {
-  background-color: #e8491d;
-}
-
-.seat.occupied {
-  background-color: #999;
-  cursor: not-allowed;
-}
-
-.legend {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.seat-legend {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  margin: 0 5px 0 15px;
-  vertical-align: middle;
-}
-
-.seat-legend.available {
-  background-color: #4caf50;
-}
-
-.seat-legend.selected {
-  background-color: #e8491d;
-}
-
-.seat-legend.occupied {
-  background-color: #999;
-}
-
 .screen-indicator {
   background: #ccc;
   text-align: center;
@@ -724,20 +587,6 @@ footer p {
   border-radius: 5px;
   font-weight: bold;
   letter-spacing: 2px;
-}
-
-@media (max-width: 768px) {
-  .reservation-modal-content {
-    max-width: 100%;
-  }
-
-  .seat-map {
-    grid-template-columns: repeat(5, 40px);
-  }
-
-  .screen-indicator {
-    width: 85%;
-  }
 }
 
 .reservation-summary {
@@ -876,29 +725,14 @@ footer p {
   background: #fff;
 }
 
-.seat.selected-for-release {
-  background-color: #c0392b;
-  color: #fff;
-  border: 2px solid #922b21;
-}
-
 .my-reservations-list {
   display: grid;
+  gap: 15px;
+  margin-top: 15px;
   gap: 10px;
   margin-top: 20px;
   position: sticky;
   top: 20px;
-}
-
-.seat.mine {
-  background-color: #2563eb;
-  color: #fff;
-  border: 1px solid #1d4ed8;
-}
-
-.seat-legend.mine {
-  background-color: #2563eb;
-  border: 1px solid #1d4ed8;
 }
 
 .my-reservations-list .event-card form {

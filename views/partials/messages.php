@@ -1,8 +1,8 @@
-<?php if (!empty($reservationMessage) || !empty($reservationError)): ?>
+<?php if ($reservationMessage || $reservationError): ?>
     <div id="toastNotification"
-        class="toast-notification <?php echo !empty($reservationError) ? 'toast-error' : 'toast-success'; ?>">
+        class="toast-notification <?php echo $reservationError ? 'toast-error' : 'toast-success'; ?>">
         <div class="toast-content">
-            <?php if (!empty($reservationError)): ?>
+            <?php if ($reservationError): ?>
                 <?php echo htmlspecialchars($reservationError); ?>
             <?php else: ?>
                 <?php echo htmlspecialchars($reservationMessage); ?>
