@@ -143,10 +143,6 @@ try {
                 <?php else: ?>
                     <?php require __DIR__ . '/views/partials/messages.php'; ?>
 
-                    
-
-
-
                     <?php require __DIR__ . '/views/partials/create_event_modal.php'; ?>
                     <? // modal dodawania wydarzenia (tylko dla administratora) ?>
 

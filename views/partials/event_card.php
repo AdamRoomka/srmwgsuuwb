@@ -82,6 +82,12 @@
                         data-occupied-seats='<?php echo htmlspecialchars(json_encode($eventOccupiedSeats), ENT_QUOTES, 'UTF-8'); ?>'>
                         Zarządzaj miejscami
                     </button>
+                    <button type="button" class="btn btn-secondary open-reservations-list-modal"
+                        data-event-id="<?php echo (int) $event['id']; ?>"
+                        data-event-name="<?php echo htmlspecialchars($event['name']); ?>"
+                        data-occupied-seats='<?php echo htmlspecialchars(json_encode($eventOccupiedSeats), ENT_QUOTES, 'UTF-8'); ?>'>
+                        Rezerwacje
+                    </button>
                 </div>
             <?php endif; ?>
         </div>

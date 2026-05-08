@@ -1,6 +1,17 @@
 window.App = window.App || {};
 
 document.addEventListener('app:ready', function () {
+    console.log('=== SEAT MAP SCRIPT LOADED ===');
+    console.log('Checking for buttons...');
+    
+    const reservationButtons = document.querySelectorAll('.open-reservation-modal');
+    const manageButtons = document.querySelectorAll('.open-manage-seats-modal');
+    const reservationsListButtons = document.querySelectorAll('.open-reservations-list-modal');
+    
+    console.log('Reservation buttons found:', reservationButtons.length);
+    console.log('Manage buttons found:', manageButtons.length);
+    console.log('Reservations list buttons found:', reservationsListButtons.length);
+    
     const currentUserId = App.currentUserId ?? null;
 
     const seatMap = document.getElementById('seatMap');
@@ -27,6 +38,12 @@ document.addEventListener('app:ready', function () {
     const reserveManagedSeatsBtn = document.getElementById('reserveManagedSeatsBtn');
     const releaseManagedSeatsBtn = document.getElementById('releaseManagedSeatsBtn');
     const manageSeatsModalTitle = document.getElementById('manageSeatsModalTitle');
+
+    const reservationsListModal = document.getElementById('reservationsListModal');
+    const closeReservationsListModal = document.getElementById('closeReservationsListModal');
+    const closeReservationsListBtn = document.getElementById('closeReservationsListBtn');
+    const reservationsList = document.getElementById('reservationsList');
+    const reservationsListModalTitle = document.getElementById('reservationsListModalTitle');
 
     let selectedSeats = [];
     let occupiedSeats = [];
@@ -184,6 +201,67 @@ document.addEventListener('app:ready', function () {
         );
     }
 
+    function renderReservationsList(occupiedSeatsData) {
+        console.log('renderReservationsList called');
+        console.log('reservationsList element:', reservationsList);
+        
+        if (!reservationsList) {
+            console.error('reservationsList element is null!');
+            return;
+        }
+
+        console.log('Clearing innerHTML...');
+        reservationsList.innerHTML = '';
+
+        if (occupiedSeatsData.length === 0) {
+            console.log('No occupied seats');
+            reservationsList.innerHTML = '<p style="text-align: center; color: #666;">Brak rezerwacji</p>';
+            return;
+        }
+
+        // Group by user
+        const usersMap = {};
+        occupiedSeatsData.forEach(seat => {
+            const userId = seat.user_id;
+            const userName = seat.first_name + ' ' + seat.last_name;
+            if (!usersMap[userId]) {
+                usersMap[userId] = {
+                    name: userName,
+                    seats: []
+                };
+            }
+            usersMap[userId].seats.push(seat.seat_number);
+        });
+
+        console.log('Users map:', usersMap);
+
+        // Create list
+        const list = document.createElement('div');
+        list.className = 'reservations-items';
+
+        Object.keys(usersMap).forEach(userId => {
+            const userData = usersMap[userId];
+            const item = document.createElement('div');
+            item.className = 'reservation-item';
+            
+            const seatsText = userData.seats.sort((a, b) => a - b).join(', ');
+            item.innerHTML = `
+                <div class="reservation-user">
+                    <strong>${userData.name}</strong>
+                </div>
+                <div class="reservation-seats">
+                    Miejsca: ${seatsText}
+                </div>
+            `;
+            
+            list.appendChild(item);
+        });
+
+        console.log('Appending list to reservationsList...');
+        reservationsList.appendChild(list);
+        console.log('List appended!');
+    }
+
     document.querySelectorAll('.open-reservation-modal').forEach(button => {
         button.addEventListener('click', function () {
             selectedSeats = [];
@@ -211,6 +289,67 @@ document.addEventListener('app:ready', function () {
             updateAdminSelectedSeatsInfo();
             renderAdminSeats();
             App.openModal(manageSeatsModal);
+        });
+    });
+
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.open-reservations-list-modal');
+        if (!btn) return;
+
+        console.log('Rezerwacje button clicked via event delegation');
+        const occupiedSeatsData = App.parseJsonSafely(btn.dataset.occupiedSeats || '[]');
+        const eventName = btn.dataset.eventName || '';
+        
+        console.log('occupiedSeatsData:', occupiedSeatsData);
+        console.log('eventName:', eventName);
+        console.log('reservationsListModal:', reservationsListModal);
+        
+        if (!reservationsListModal) {
+            console.error('reservationsListModal not found!');
+            alert('BŁĄD: Modal nie został znaleziony. Zaloguj się ponownie.');
+            return;
+        }
+
+        if (reservationsListModalTitle) {
+            reservationsListModalTitle.textContent = 'Rezerwacje: ' + eventName;
+        }
+
+        console.log('Calling renderReservationsList...');
+        renderReservationsList(occupiedSeatsData);
+        
+        console.log('Opening modal...');
+        App.openModal(reservationsListModal);
+        console.log('Modal opened!');
+    });
+
+    // Keep the old forEach approach as backup
+    document.querySelectorAll('.open-reservations-list-modal').forEach(button => {
+        console.log('Registering click handler for button:', button);
+        button.addEventListener('click', function (e) {
+            console.log('Rezerwacje button clicked - event:', e);
+            const occupiedSeatsData = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
+            const eventName = this.dataset.eventName || '';
+            
+            console.log('occupiedSeatsData:', occupiedSeatsData);
+            console.log('eventName:', eventName);
+            console.log('reservationsListModal:', reservationsListModal);
+            
+            if (!reservationsListModal) {
+                console.error('reservationsListModal not found!');
+                alert('BŁĄD: Modal nie został znaleziony. Zaloguj się ponownie.');
+                return;
+            }
+
+            if (reservationsListModalTitle) {
+                reservationsListModalTitle.textContent = 'Rezerwacje: ' + eventName;
+            }
+
+            console.log('Calling renderReservationsList...');
+            renderReservationsList(occupiedSeatsData);
+            
+            console.log('Opening modal...');
+            App.openModal(reservationsListModal);
+            console.log('Modal opened!');
         });
     });
 
@@ -276,6 +415,26 @@ document.addEventListener('app:ready', function () {
             const manageSeatsForm = document.getElementById('manageSeatsForm');
             if (manageSeatsForm) {
                 manageSeatsForm.submit();
+            }
+        });
+    }
+
+    if (closeReservationsListModal && reservationsListModal) {
+        closeReservationsListModal.addEventListener('click', function () {
+            App.closeModal(reservationsListModal);
+        });
+    }
+
+    if (closeReservationsListBtn && reservationsListModal) {
+        closeReservationsListBtn.addEventListener('click', function () {
+            App.closeModal(reservationsListModal);
+        });
+    }
+
+    if (reservationsListModal) {
+        reservationsListModal.addEventListener('click', function (e) {
+            if (e.target === reservationsListModal) {
+                App.closeModal(reservationsListModal);
             }
         });
     }

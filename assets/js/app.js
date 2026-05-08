@@ -167,4 +167,215 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+
+    // Handle reservations list modal
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.open-reservations-list-modal');
+        if (!btn) return;
+
+        console.log('Rezerwacje button clicked');
+        const reservationsListModal = document.getElementById('reservationsListModal');
+        const reservationsListModalTitle = document.getElementById('reservationsListModalTitle');
+        const reservationsList = document.getElementById('reservationsList');
+        const reservationsViewSeatMap = document.getElementById('reservationsViewSeatMap');
+
+        if (!reservationsListModal) {
+            console.error('reservationsListModal not found');
+            alert('BŁĄD: Modal rezerwacji nie został znaleziony');
+            return;
+        }
+
+        const occupiedSeatsData = App.parseJsonSafely(btn.dataset.occupiedSeats || '[]');
+        const eventName = btn.dataset.eventName || '';
+
+        console.log('occupiedSeatsData:', occupiedSeatsData);
+        console.log('eventName:', eventName);
+
+        if (reservationsListModalTitle) {
+            reservationsListModalTitle.textContent = 'Rezerwacje: ' + eventName;
+        }
+
+        // Render reservations list
+        if (reservationsList) {
+            reservationsList.innerHTML = '';
+
+            if (occupiedSeatsData.length === 0) {
+                reservationsList.innerHTML = '<p style="text-align: center; color: #666;">Brak rezerwacji</p>';
+            } else {
+                // Group by user
+                const usersMap = {};
+                occupiedSeatsData.forEach(seat => {
+                    const userId = seat.user_id;
+                    const userName = seat.first_name + ' ' + seat.last_name;
+                    if (!usersMap[userId]) {
+                        usersMap[userId] = {
+                            name: userName,
+                            seats: []
+                        };
+                    }
+                    usersMap[userId].seats.push(seat.seat_number);
+                });
+
+                // Create list
+                const list = document.createElement('div');
+                list.className = 'reservations-items';
+
+                Object.keys(usersMap).forEach(userId => {
+                    const userData = usersMap[userId];
+                    const item = document.createElement('div');
+                    item.className = 'reservation-item';
+                    item.dataset.userId = userId;
+                    item.dataset.seats = userData.seats.sort((a, b) => a - b).join(',');
+
+                    const seatsText = userData.seats.sort((a, b) => a - b).join(', ');
+                    item.innerHTML = `
+                        <div class="reservation-user">
+                            <strong>${userData.name}</strong>
+                        </div>
+                        <div class="reservation-seats">
+                            Miejsca: ${seatsText}
+                        </div>
+                    `;
+
+                    list.appendChild(item);
+                });
+
+                reservationsList.appendChild(list);
+            }
+        }
+
+        // Render seat map
+        if (reservationsViewSeatMap && occupiedSeatsData.length > 0) {
+            const totalSeats = Math.max(...occupiedSeatsData.map(s => s.seat_number), 0);
+            
+            const hallLayout = [
+                { type: 'row', blocks: [4, 2, 3, 2, 3, 2, 7] },
+                { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
+                { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
+                { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
+                { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 4] },
+                { type: 'row', blocks: [0, 7, 3, 1, 0, 5, 4] }
+            ];
+
+            // Build hall structure
+            let seatNumber = 1;
+            const rows = [];
+            hallLayout.forEach(layoutRow => {
+                const slots = [];
+                layoutRow.blocks.forEach((count, index) => {
+                    const isSeatBlock = index % 2 === 0;
+                    if (isSeatBlock) {
+                        for (let i = 0; i < count; i++) {
+                            if (seatNumber <= totalSeats) {
+                                slots.push({ type: 'seat', seatNumber });
+                                seatNumber++;
+                            } else {
+                                slots.push({ type: 'empty' });
+                            }
+                        }
+                    } else {
+                        for (let i = 0; i < count; i++) {
+                            slots.push({ type: 'gap' });
+                        }
+                    }
+                });
+                rows.push({ type: 'row', slots });
+            });
+
+            // Render seats
+            reservationsViewSeatMap.innerHTML = '';
+            const hallBody = document.createElement('div');
+            hallBody.className = 'hall-body';
+
+            rows.forEach(rowData => {
+                const row = document.createElement('div');
+                row.className = 'hall-row-grid';
+                row.style.gridTemplateColumns = `repeat(${rowData.slots.length}, 38px)`;
+
+                rowData.slots.forEach(slot => {
+                    if (slot.type === 'gap' || slot.type === 'empty') {
+                        const spacer = document.createElement('div');
+                        spacer.className = 'seat-spacer';
+                        row.appendChild(spacer);
+                        return;
+                    }
+
+                    const seatNum = slot.seatNumber;
+                    const seat = document.createElement('div');
+                    seat.className = 'seat';
+                    seat.dataset.seatNumber = seatNum;
+                    seat.textContent = seatNum;
+
+                    const isOccupied = occupiedSeatsData.some(s => s.seat_number === seatNum);
+                    
+                    if (isOccupied) {
+                        seat.classList.add('occupied');
+                        const occupiedSeat = occupiedSeatsData.find(s => s.seat_number === seatNum);
+                        if (occupiedSeat && occupiedSeat.first_name && occupiedSeat.last_name) {
+                            const initials = occupiedSeat.first_name.charAt(0).toUpperCase() + occupiedSeat.last_name;
+                            seat.dataset.userInitials = initials;
+                            seat.title = initials;
+                        }
+                    }
+
+                    row.appendChild(seat);
+                });
+
+                hallBody.appendChild(row);
+            });
+
+            reservationsViewSeatMap.appendChild(hallBody);
+        }
+
+        // Add click handler for reservation items
+        const reservationItems = reservationsList.querySelectorAll('.reservation-item');
+        reservationItems.forEach(item => {
+            item.addEventListener('click', function () {
+                // Remove active class from all items
+                reservationItems.forEach(i => i.classList.remove('active'));
+                // Add active class to clicked item
+                this.classList.add('active');
+
+                // Get seats for this user
+                const userSeats = this.dataset.seats.split(',').map(s => parseInt(s.trim()));
+
+                // Remove highlights from all seats
+                const allSeats = reservationsViewSeatMap.querySelectorAll('.seat');
+                allSeats.forEach(seat => seat.classList.remove('highlighted'));
+
+                // Highlight user's seats
+                userSeats.forEach(seatNum => {
+                    const seat = reservationsViewSeatMap.querySelector(`[data-seat-number="${seatNum}"]`);
+                    if (seat) {
+                        seat.classList.add('highlighted');
+                    }
+                });
+            });
+        });
+
+        // Open modal
+        App.openModal(reservationsListModal);
+
+        // Setup close handlers
+        const closeReservationsListModal = document.getElementById('closeReservationsListModal');
+        const closeReservationsListBtn = document.getElementById('closeReservationsListBtn');
+
+        if (closeReservationsListModal) {
+            closeReservationsListModal.onclick = function () {
+                App.closeModal(reservationsListModal);
+            };
+        }
+
+        if (closeReservationsListBtn) {
+            closeReservationsListBtn.onclick = function () {
+                App.closeModal(reservationsListModal);
+            };
+        }
+
+        reservationsListModal.onclick = function (e) {
+            if (e.target === reservationsListModal) {
+                App.closeModal(reservationsListModal);
+            }
+        };
+    });
 });
