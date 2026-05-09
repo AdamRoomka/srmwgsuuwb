@@ -1,5 +1,4 @@
 <?php
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])) {
     if (!$currentUser || $currentUser['role'] !== 'ADMINISTRATOR') {
         $_SESSION['reservationError'] = 'Tylko administrator może zarządzać miejscami.';
@@ -33,12 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
         exit;
     }
 
-    $eventStmt = $pdo->prepare("
-        SELECT id, total_seats, status
-        FROM events
-        WHERE id = :id
-        LIMIT 1
-    ");
+    $eventStmt = $pdo->prepare("\n        SELECT id, total_seats, status\n        FROM events\n        WHERE id = :id\n        LIMIT 1\n    ");
     $eventStmt->execute(['id' => $eventId]);
     $eventRow = $eventStmt->fetch();
 
@@ -64,13 +58,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
         }
     }
 
-    if ($seatAction === 'reserve' && $selectedUserId !== null) {
-        $userStmt = $pdo->prepare("
-            SELECT id
-            FROM users
-            WHERE id = :id
-            LIMIT 1
-        ");
+    if ($seatAction === 'reserve' && $selectedUserId === null) {
+        $_SESSION['reservationError'] = 'Wybierz użytkownika, do którego mają zostać przypisane miejsca.';
+        header('Location: index.php');
+        exit;
+    }
+
+    if ($seatAction === 'reserve') {
+        $userStmt = $pdo->prepare("\n            SELECT id\n            FROM users\n            WHERE id = :id\n            LIMIT 1\n        ");
         $userStmt->execute(['id' => $selectedUserId]);
         $userExists = $userStmt->fetch();
 
@@ -87,13 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
         if ($seatAction === 'reserve') {
             $placeholders = implode(',', array_fill(0, count($selectedSeatsArray), '?'));
 
-            $checkStmt = $pdo->prepare("
-                SELECT seat_number
-                FROM occupied_seats
-                WHERE event_id = ?
-                  AND status = 'AKTYWNA'
-                  AND seat_number IN ($placeholders)
-            ");
+            $checkStmt = $pdo->prepare("\n                SELECT seat_number\n                FROM occupied_seats\n                WHERE event_id = ?\n                  AND status = 'AKTYWNA'\n                  AND seat_number IN ($placeholders)\n            ");
             $checkStmt->execute(array_merge([$eventId], $selectedSeatsArray));
             $takenSeats = $checkStmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -104,20 +93,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
                 exit;
             }
 
-            $reservationStmt = $pdo->prepare("
-                INSERT INTO reservations (user_id, event_id, reserved_seats, status)
-                VALUES (:user_id, :event_id, :reserved_seats, 'AKTYWNA')
-            ");
+            $reservationStmt = $pdo->prepare("\n                INSERT INTO reservations (user_id, event_id, reserved_seats, status)\n                VALUES (:user_id, :event_id, :reserved_seats, 'AKTYWNA')\n            ");
             $reservationStmt->execute([
                 'user_id' => $selectedUserId,
                 'event_id' => $eventId,
                 'reserved_seats' => count($selectedSeatsArray),
             ]);
 
-            $seatInsertStmt = $pdo->prepare("
-                INSERT INTO occupied_seats (event_id, seat_number, user_id, status)
-                VALUES (:event_id, :seat_number, :user_id, 'AKTYWNA')
-            ");
+            $seatInsertStmt = $pdo->prepare("\n                INSERT INTO occupied_seats (event_id, seat_number, user_id, status)\n                VALUES (:event_id, :seat_number, :user_id, 'AKTYWNA')\n            ");
 
             foreach ($selectedSeatsArray as $seatNumber) {
                 $seatInsertStmt->execute([
@@ -127,23 +110,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
                 ]);
             }
 
-            if ($selectedUserId !== null) {
-                $_SESSION['reservationMessage'] = 'Miejsca zostały przypisane do wybranego użytkownika.';
-            } else {
-                $_SESSION['reservationMessage'] = 'Miejsca zostały zarezerwowane bez przypisania do konkretnej osoby.';
-            }
+            $_SESSION['reservationMessage'] = 'Miejsca zostały przypisane do wybranego użytkownika.';
         }
 
         if ($seatAction === 'release') {
             $placeholders = implode(',', array_fill(0, count($selectedSeatsArray), '?'));
 
-            $checkStmt = $pdo->prepare("
-                SELECT id, seat_number
-                FROM occupied_seats
-                WHERE event_id = ?
-                  AND status = 'AKTYWNA'
-                  AND seat_number IN ($placeholders)
-            ");
+            $checkStmt = $pdo->prepare("\n                SELECT id, seat_number\n                FROM occupied_seats\n                WHERE event_id = ?\n                  AND status = 'AKTYWNA'\n                  AND seat_number IN ($placeholders)\n            ");
             $checkStmt->execute(array_merge([$eventId], $selectedSeatsArray));
             $occupiedRows = $checkStmt->fetchAll();
 
@@ -154,30 +127,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
                 exit;
             }
 
-            $deleteSeatsStmt = $pdo->prepare("
-                DELETE FROM occupied_seats
-                WHERE event_id = ?
-                  AND seat_number IN ($placeholders)
-            ");
+            $deleteSeatsStmt = $pdo->prepare("\n                DELETE FROM occupied_seats\n                WHERE event_id = ?\n                  AND seat_number IN ($placeholders)\n            ");
             $deleteSeatsStmt->execute(array_merge([$eventId], $selectedSeatsArray));
 
-            $updateReservationsStmt = $pdo->prepare("
-                UPDATE reservations
-                SET reserved_seats = reserved_seats - 1
-                WHERE event_id = :event_id
-                  AND status = 'AKTYWNA'
-                  AND reserved_seats > 0
-            ");
+            $updateReservationsStmt = $pdo->prepare("\n                UPDATE reservations\n                SET reserved_seats = reserved_seats - 1\n                WHERE event_id = :event_id\n                  AND status = 'AKTYWNA'\n                  AND reserved_seats > 0\n            ");
             foreach ($selectedSeatsArray as $seatNumber) {
                 $updateReservationsStmt->execute(['event_id' => $eventId]);
             }
 
-            $deleteEmptyReservationsStmt = $pdo->prepare("
-                DELETE FROM reservations
-                WHERE event_id = :event_id
-                  AND status = 'AKTYWNA'
-                  AND reserved_seats <= 0
-            ");
+            $deleteEmptyReservationsStmt = $pdo->prepare("\n                DELETE FROM reservations\n                WHERE event_id = :event_id\n                  AND status = 'AKTYWNA'\n                  AND reserved_seats <= 0\n            ");
             $deleteEmptyReservationsStmt->execute(['event_id' => $eventId]);
 
             $_SESSION['reservationMessage'] = 'Wybrane miejsca zostały zwolnione.';

@@ -1,17 +1,10 @@
 window.App = window.App || {};
 
 document.addEventListener('app:ready', function () {
-    console.log('=== SEAT MAP SCRIPT LOADED ===');
-    console.log('Checking for buttons...');
-    
     const reservationButtons = document.querySelectorAll('.open-reservation-modal');
     const manageButtons = document.querySelectorAll('.open-manage-seats-modal');
     const reservationsListButtons = document.querySelectorAll('.open-reservations-list-modal');
-    
-    console.log('Reservation buttons found:', reservationButtons.length);
-    console.log('Manage buttons found:', manageButtons.length);
-    console.log('Reservations list buttons found:', reservationsListButtons.length);
-    
+
     const currentUserId = App.currentUserId ?? null;
 
     const seatMap = document.getElementById('seatMap');
@@ -139,11 +132,30 @@ document.addEventListener('app:ready', function () {
                 seat.dataset.seatNumber = seatNumber;
                 seat.textContent = seatNumber;
 
-                const occupiedSeat = occupiedSource.find(item => parseInt(item.seat_number, 10) === seatNumber);
+                const occupiedSeat = occupiedSource.find(item => {
+                    console.log('item.seat_number przed parseInt:', item.seat_number);
+
+                    const parsedSeatNumber = parseInt(item.seat_number, 10);
+                    console.log('item.seat_number po parseInt:', parsedSeatNumber);
+                    console.log('seatNumber do porównania:', seatNumber);
+                    console.log(' ');
+                    return parsedSeatNumber === seatNumber;
+                }) || null;
                 const isOccupied = !!occupiedSeat;
                 // console.log(`Rendering seat ${seatNumber}: occupied=${isOccupied}, occupiedSeatUserId=${occupiedSeat ? occupiedSeat.user_id : 'N/A'}, currentUserId=${currentUserId}`);
-                const isMine = isOccupied && currentUserId !== null && parseInt(occupiedSeat.user_id, 10) === currentUserId;
+                const isMine = isOccupied && occupiedSeat.user_id !== null && currentUserId !== null && parseInt(occupiedSeat.user_id, 10) === currentUserId;
                 const isSelected = selectedSource.includes(seatNumber);
+
+                if (occupiedSeat) {
+                    if (occupiedSeat.user_id && occupiedSeat.first_name && occupiedSeat.last_name) {
+                        const seatLabel = occupiedSeat.first_name.charAt(0).toUpperCase() + occupiedSeat.last_name;
+                        seat.dataset.userInitials = seatLabel;
+                        seat.title = seatLabel;
+                    } else {
+                        seat.dataset.userInitials = 'Zarezerwowano';
+                        seat.title = 'Zarezerwowano';
+                    }
+                }
 
                 if (isOccupied) seat.classList.add('occupied');
                 if (isMine) seat.classList.add('mine');
@@ -201,16 +213,14 @@ document.addEventListener('app:ready', function () {
         );
     }
 
-    function renderReservationsList(occupiedSeatsData) {
-        console.log('renderReservationsList called');
+    function renderReservationsList(occupiedSeatsData, totalSeatsFromButton = 0) {
         console.log('reservationsList element:', reservationsList);
-        
+
         if (!reservationsList) {
             console.error('reservationsList element is null!');
             return;
         }
 
-        console.log('Clearing innerHTML...');
         reservationsList.innerHTML = '';
 
         if (occupiedSeatsData.length === 0) {
@@ -222,15 +232,17 @@ document.addEventListener('app:ready', function () {
         // Group by user
         const usersMap = {};
         occupiedSeatsData.forEach(seat => {
-            const userId = seat.user_id;
-            const userName = seat.first_name + ' ' + seat.last_name;
+            const userId = seat.user_id ?? 'null';
+            const userName = seat.user_id && seat.first_name && seat.last_name
+                ? seat.first_name + ' ' + seat.last_name
+                : 'Zarezerwowano';
             if (!usersMap[userId]) {
                 usersMap[userId] = {
                     name: userName,
                     seats: []
                 };
             }
-            usersMap[userId].seats.push(seat.seat_number);
+            usersMap[userId].seats.push(parseInt(seat.seat_number, 10));
         });
 
         console.log('Users map:', usersMap);
@@ -243,8 +255,11 @@ document.addEventListener('app:ready', function () {
             const userData = usersMap[userId];
             const item = document.createElement('div');
             item.className = 'reservation-item';
-            
-            const seatsText = userData.seats.sort((a, b) => a - b).join(', ');
+
+            const seatsText = userData.seats
+                .filter(Number.isFinite)
+                .sort((a, b) => a - b)
+                .join(', ');
             item.innerHTML = `
                 <div class="reservation-user">
                     <strong>${userData.name}</strong>
@@ -253,13 +268,11 @@ document.addEventListener('app:ready', function () {
                     Miejsca: ${seatsText}
                 </div>
             `;
-            
+
             list.appendChild(item);
         });
 
-        console.log('Appending list to reservationsList...');
         reservationsList.appendChild(list);
-        console.log('List appended!');
     }
 
     document.querySelectorAll('.open-reservation-modal').forEach(button => {
@@ -296,14 +309,11 @@ document.addEventListener('app:ready', function () {
         const btn = e.target.closest('.open-reservations-list-modal');
         if (!btn) return;
 
-        console.log('Rezerwacje button clicked via event delegation');
         const occupiedSeatsData = App.parseJsonSafely(btn.dataset.occupiedSeats || '[]');
+        const totalSeatsFromButton = parseInt(btn.dataset.totalSeats || '0', 10);
         const eventName = btn.dataset.eventName || '';
-        
-        console.log('occupiedSeatsData:', occupiedSeatsData);
-        console.log('eventName:', eventName);
-        console.log('reservationsListModal:', reservationsListModal);
-        
+
+
         if (!reservationsListModal) {
             console.error('reservationsListModal not found!');
             alert('BŁĄD: Modal nie został znaleziony. Zaloguj się ponownie.');
@@ -314,26 +324,18 @@ document.addEventListener('app:ready', function () {
             reservationsListModalTitle.textContent = 'Rezerwacje: ' + eventName;
         }
 
-        console.log('Calling renderReservationsList...');
-        renderReservationsList(occupiedSeatsData);
-        
-        console.log('Opening modal...');
+        renderReservationsList(occupiedSeatsData, totalSeatsFromButton);
+
         App.openModal(reservationsListModal);
-        console.log('Modal opened!');
     });
 
     // Keep the old forEach approach as backup
     document.querySelectorAll('.open-reservations-list-modal').forEach(button => {
-        console.log('Registering click handler for button:', button);
         button.addEventListener('click', function (e) {
-            console.log('Rezerwacje button clicked - event:', e);
             const occupiedSeatsData = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
+            const totalSeatsFromButton = parseInt(this.dataset.totalSeats || '0', 10);
             const eventName = this.dataset.eventName || '';
-            
-            console.log('occupiedSeatsData:', occupiedSeatsData);
-            console.log('eventName:', eventName);
-            console.log('reservationsListModal:', reservationsListModal);
-            
+
             if (!reservationsListModal) {
                 console.error('reservationsListModal not found!');
                 alert('BŁĄD: Modal nie został znaleziony. Zaloguj się ponownie.');
@@ -344,12 +346,9 @@ document.addEventListener('app:ready', function () {
                 reservationsListModalTitle.textContent = 'Rezerwacje: ' + eventName;
             }
 
-            console.log('Calling renderReservationsList...');
-            renderReservationsList(occupiedSeatsData);
-            
-            console.log('Opening modal...');
+            renderReservationsList(occupiedSeatsData, totalSeatsFromButton);
+
             App.openModal(reservationsListModal);
-            console.log('Modal opened!');
         });
     });
 

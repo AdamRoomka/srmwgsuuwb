@@ -55,11 +55,10 @@
 
                 <div class="step-container">
                     <div class="form-group">
-                        <label for="manageSeatsUserSelect">Przypisz do użytkownika (opcjonalnie)</label>
-                        <select id="manageSeatsUserSelect" name="selected_user_id">
-                            <option value="">Bez przypisania do konkretnej osoby</option>
+                        <label for="manageSeatsUserSelect">Przypisz do użytkownika</label>
+                        <select id="manageSeatsUserSelect" name="selected_user_id" required>
                             <?php foreach ($usersForAdminSeatAssignment as $userOption): ?>
-                                <option value="<?php echo (int) $userOption['id']; ?>">
+                                <option value="<?php echo (int) $userOption['id']; ?>" <?php echo $currentUser && (int) $userOption['id'] === (int) $currentUser['id'] ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($userOption['first_name'] . ' ' . $userOption['last_name'] . ' (' . $userOption['email'] . ')'); ?>
                                 </option>
                             <?php endforeach; ?>

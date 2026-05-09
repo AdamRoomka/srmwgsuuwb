@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const occupiedSeatsData = App.parseJsonSafely(btn.dataset.occupiedSeats || '[]');
+        const totalSeatsFromButton = parseInt(btn.dataset.totalSeats || '0', 10);
         const eventName = btn.dataset.eventName || '';
 
         console.log('occupiedSeatsData:', occupiedSeatsData);
@@ -205,8 +206,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Group by user
                 const usersMap = {};
                 occupiedSeatsData.forEach(seat => {
-                    const userId = seat.user_id;
-                    const userName = seat.first_name + ' ' + seat.last_name;
+                    const userId = seat.user_id || 'null';
+                    const userName = (seat.user_id && seat.first_name && seat.last_name) ? (seat.first_name + ' ' + seat.last_name) : 'Zarezerwowano';
                     if (!usersMap[userId]) {
                         usersMap[userId] = {
                             name: userName,
@@ -244,9 +245,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Render seat map
-        if (reservationsViewSeatMap && occupiedSeatsData.length > 0) {
-            const totalSeats = Math.max(...occupiedSeatsData.map(s => s.seat_number), 0);
+        // Render seat map for the current event every time, even when there are no reservations.
+        if (reservationsViewSeatMap) {
+            const occupiedSeatNumbers = occupiedSeatsData
+                .map(s => parseInt(s.seat_number, 10))
+                .filter(Number.isFinite);
+            const occupiedMax = occupiedSeatNumbers.length ? Math.max(...occupiedSeatNumbers) : 0;
+            const totalSeats = Math.max(totalSeatsFromButton, occupiedMax);
             
             const hallLayout = [
                 { type: 'row', blocks: [4, 2, 3, 2, 3, 2, 7] },
@@ -306,15 +311,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     seat.dataset.seatNumber = seatNum;
                     seat.textContent = seatNum;
 
-                    const isOccupied = occupiedSeatsData.some(s => s.seat_number === seatNum);
+                    const isOccupied = occupiedSeatNumbers.includes(seatNum);
                     
                     if (isOccupied) {
                         seat.classList.add('occupied');
-                        const occupiedSeat = occupiedSeatsData.find(s => s.seat_number === seatNum);
-                        if (occupiedSeat && occupiedSeat.first_name && occupiedSeat.last_name) {
-                            const initials = occupiedSeat.first_name.charAt(0).toUpperCase() + occupiedSeat.last_name;
-                            seat.dataset.userInitials = initials;
-                            seat.title = initials;
+                        const occupiedSeat = occupiedSeatsData.find(s => parseInt(s.seat_number, 10) === seatNum);
+                        if (occupiedSeat) {
+                            let tooltip = 'Zarezerwowano';
+                            if (occupiedSeat.user_id && occupiedSeat.first_name && occupiedSeat.last_name) {
+                                tooltip = occupiedSeat.first_name.charAt(0).toUpperCase() + occupiedSeat.last_name;
+                            }
+                            seat.dataset.userInitials = tooltip;
+                            seat.title = tooltip;
                         }
                     }
 
