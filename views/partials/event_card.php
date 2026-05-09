@@ -48,7 +48,7 @@
             <?php elseif (!$currentUser && $event['status'] === 'PLANOWANE' && $availableSeats > 0): ?>
                 <p class="reserve-note">Zaloguj się, aby zarezerwować miejsca.</p>
             <?php elseif ($availableSeats <= 0 && $event['status'] === 'PLANOWANE'): ?>
-                <p class="blocked-msg">FULL (BRAK MIEJSC)</p>
+                <p class="blocked-msg">BRAK MIEJSC</p>
             <?php else: ?>
                 <div class="blocked-msg">
                     <i class="fa-solid fa-info"></i>
@@ -81,6 +81,13 @@
                         data-total-seats="<?php echo (int) $event['total_seats']; ?>"
                         data-occupied-seats='<?php echo htmlspecialchars(json_encode($eventOccupiedSeats), ENT_QUOTES, 'UTF-8'); ?>'>
                         Zarządzaj miejscami
+                    </button>
+                    <button type="button" class="btn btn-secondary open-reservations-list-modal"
+                        data-event-id="<?php echo (int) $event['id']; ?>"
+                        data-event-name="<?php echo htmlspecialchars($event['name']); ?>"
+                        data-total-seats="<?php echo (int) $event['total_seats']; ?>"
+                        data-occupied-seats='<?php echo htmlspecialchars(json_encode($eventOccupiedSeats), ENT_QUOTES, 'UTF-8'); ?>'>
+                        Rezerwacje
                     </button>
                 </div>
             <?php endif; ?>
