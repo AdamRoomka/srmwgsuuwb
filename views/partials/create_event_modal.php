@@ -6,7 +6,7 @@
                 <button type="button" class="modal-close" id="closeCreateEventModal">&times;</button>
             </div>
 
-            <form method="post" id="createEventForm">
+            <form method="post" id="createEventForm" novalidate>
                 <input type="hidden" name="create_event" value="1">
 
                 <div class="step-container">
@@ -32,7 +32,8 @@
 
                     <div class="form-group">
                         <label for="event_total_seats">Liczba miejsc</label>
-                        <input type="number" id="event_total_seats" name="event_total_seats" min="1" max="100" value="90" required>
+                        <input type="number" id="event_total_seats" name="event_total_seats" min="1" max="100" value="90"
+                            required>
                     </div>
 
                     <div class="form-group">
@@ -46,7 +47,7 @@
 
                     <div class="action-buttons">
                         <button type="button" class="btn btn-secondary" id="cancelCreateEventBtn">Anuluj</button>
-                        <button type="submit" class="btn btn-primary">Dodaj wydarzenie</button>
+                        <button type="button" class="btn btn-primary" id="createEventBtn">Dodaj wydarzenie</button>
                     </div>
                 </div>
             </form>
@@ -88,7 +89,8 @@
 
                     <div class="form-group">
                         <label for="edit_event_total_seats">Liczba miejsc</label>
-                        <input type="number" id="edit_event_total_seats" name="event_total_seats" min="1" max="100" value="90" required>
+                        <input type="number" id="edit_event_total_seats" name="event_total_seats" min="1" max="100"
+                            value="90" required>
                     </div>
 
                     <div class="form-group">

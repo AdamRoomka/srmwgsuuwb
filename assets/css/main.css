@@ -225,9 +225,8 @@ h2 {
 
 .step-container {
   background: #fff;
-  padding: 30px;
+  padding: 20px;
   border-radius: 8px;
-  margin-top: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -237,9 +236,24 @@ h2 {
 
 .form-group input {
   padding: 10px;
-  width: 100px;
+  width: 100%;
   border: 1px solid #ccc;
   border-radius: 4px;
+  transition: border-color 0.2s ease;
+}
+
+.error,
+.form-group input.input-error,
+.form-group select.input-error {
+  border: 2px solid #d32f2f;
+  background-color: #ffebee;
+}
+
+.form-group input.input-error:focus,
+.form-group select.input-error:focus {
+  outline: none;
+  border-color: #c62828;
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
 }
 
 .screen-indicator {

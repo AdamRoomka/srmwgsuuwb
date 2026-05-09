@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const openCreateEventModal = document.getElementById('openCreateEventModal');
     const closeCreateEventModal = document.getElementById('closeCreateEventModal');
     const cancelCreateEventBtn = document.getElementById('cancelCreateEventBtn');
+    const createEventBtn = document.getElementById('createEventBtn');
 
     if (openCreateEventModal && createEventModal) {
         openCreateEventModal.addEventListener('click', function () {
@@ -121,6 +122,91 @@ document.addEventListener('DOMContentLoaded', function () {
         cancelCreateEventBtn.addEventListener('click', function () {
             App.closeModal(createEventModal);
         });
+    }
+
+    const createEventForm = document.getElementById('createEventForm');
+
+    if (createEventBtn && createEventModal) {
+        createEventBtn.addEventListener('click', function (e) {
+            if (!checkCreateEventFormValidity()) {
+                e.preventDefault();
+            } else {
+                createEventForm.submit();
+            }
+        });
+    }
+
+    function checkCreateEventFormValidity() {
+        const form = document.getElementById('createEventForm');
+        if (!form) return false;
+
+        const name = form.querySelector('#event_name');
+        const startAt = form.querySelector('#event_start_at');
+        const duration = form.querySelector('#event_duration_minutes');
+        const totalSeats = form.querySelector('#event_total_seats');
+        const description = form.querySelector('#event_description');
+        const status = form.querySelector('#event_status');
+
+        let isValid = true;
+        let errorMessages = "";
+
+        function setFirstError(message) {
+            if (!errorMessages) {
+                errorMessages = message;
+            }
+            isValid = false;
+        }
+
+        if (!name || !name.value.trim()) {
+            setFirstError('Nazwa wydarzenia jest wymagana.');
+            messageToastSet("event_name");
+        }
+
+        if (!description || !description.value.trim()) {
+            setFirstError('Opis wydarzenia jest wymagany.');
+            messageToastSet("event_description");
+        }
+
+        if (!startAt || !startAt.value.trim()) {
+            setFirstError('Data i godzina rozpoczęcia są wymagane.');
+            messageToastSet("event_start_at");
+        }
+
+        if (!duration || !duration.value.trim()) {
+            setFirstError('Czas trwania wydarzenia jest wymagany.');
+            messageToastSet("event_duration_minutes");
+        }
+
+        if (!/^\d+$/.test(duration.value.trim())) {
+            setFirstError('Czas trwania musi być liczbą.');
+            messageToastSet("event_duration_minutes");
+        }
+
+        if (!totalSeats || !totalSeats.value.trim()) {
+            setFirstError('Liczba miejsc jest wymagana.');
+            messageToastSet("event_total_seats");
+        }
+
+        if (!/^\d+$/.test(totalSeats.value.trim())) {
+            setFirstError('Liczba miejsc musi być liczbą.');
+            messageToastSet("event_total_seats");
+        }
+
+        if (!status || !status.value.trim()) {
+            setFirstError('Status wydarzenia jest wymagany.');
+            messageToastSet("event_status");
+        }
+
+        if (!isValid && errorMessages) {
+            alert(errorMessages);
+        }
+
+        return isValid;
+    }
+
+    function messageToastSet(labelname) {
+        const label = document.getElementById(labelname);
+        label.classList.add("error");
     }
 
     if (createEventModal) {
@@ -252,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .filter(Number.isFinite);
             const occupiedMax = occupiedSeatNumbers.length ? Math.max(...occupiedSeatNumbers) : 0;
             const totalSeats = Math.max(totalSeatsFromButton, occupiedMax);
-            
+
             const hallLayout = [
                 { type: 'row', blocks: [4, 2, 3, 2, 3, 2, 7] },
                 { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
@@ -312,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     seat.textContent = seatNum;
 
                     const isOccupied = occupiedSeatNumbers.includes(seatNum);
-                    
+
                     if (isOccupied) {
                         seat.classList.add('occupied');
                         const occupiedSeat = occupiedSeatsData.find(s => parseInt(s.seat_number, 10) === seatNum);
