@@ -96,6 +96,15 @@ document.addEventListener('app:ready', function () {
         selectedSeatsInput.value = sorted.join(',');
     }
 
+    function getOwnOccupiedSeatsForEvent(occupiedSeatsData, userId) {
+        if (userId === null) return [];
+
+        return occupiedSeatsData
+            .filter(item => item.user_id !== null && parseInt(item.user_id, 10) === userId)
+            .map(item => parseInt(item.seat_number, 10))
+            .filter(Number.isFinite);
+    }
+
     function updateAdminSelectedSeatsInfo() {
         if (!manageSelectedSeatsList || !manageSelectedSeatsCount || !manageSeatsSelectedSeatsInput) return;
 
@@ -163,7 +172,7 @@ document.addEventListener('app:ready', function () {
                 if (isAdminMode && isOccupied && isSelected) seat.classList.add('selected-for-release');
 
                 seat.addEventListener('click', function () {
-                    if (!isAdminMode && isOccupied) return;
+                    if (!isAdminMode && isOccupied && !isMine) return;
 
                     if (isAdminMode) {
                         if (adminSelectedSeats.includes(seatNumber)) {
@@ -277,9 +286,9 @@ document.addEventListener('app:ready', function () {
 
     document.querySelectorAll('.open-reservation-modal').forEach(button => {
         button.addEventListener('click', function () {
-            selectedSeats = [];
             currentTotalSeats = parseInt(this.dataset.totalSeats || '0', 10);
             occupiedSeats = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
+            selectedSeats = getOwnOccupiedSeatsForEvent(occupiedSeats, currentUserId);
 
             if (reserveEventId) reserveEventId.value = this.dataset.eventId || '';
             updateSelectedSeatsInfo();

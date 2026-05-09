@@ -32,7 +32,7 @@
 
                 <div class="action-buttons">
                     <button type="button" class="btn btn-secondary" id="cancelReservationBtn">Anuluj</button>
-                    <button type="submit" class="btn btn-primary">Potwierdź rezerwację</button>
+                    <button type="submit" class="btn btn-primary">Potwierdź rezerwacje</button>
                 </div>
             </div>
         </form>

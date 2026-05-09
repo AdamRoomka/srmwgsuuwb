@@ -77,6 +77,7 @@
 
 .seat:hover:not(.occupied),
 .seat-legend.selected,
+.seat.occupied.mine,
 .seat.selected {
     background: #f4c542;
     border-color: #c89b17;
@@ -94,11 +95,11 @@
 
 .seat.mine,
 .seat-legend.mine,
-.seat.occupied.mine {
+.seat.occupied.mine.selected {
     background: #2563eb;
     border-color: #1d4ed8;
     color: #fff;
-    cursor: not-allowed;
+    cursor: pointer;
 }
 
 .seat.legend {
