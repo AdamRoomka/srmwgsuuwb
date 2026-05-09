@@ -61,7 +61,7 @@
                 <button type="button" class="modal-close" id="closeEditEventModal">&times;</button>
             </div>
 
-            <form method="post" id="editEventForm">
+            <form method="post" id="editEventForm" novalidate>
                 <input type="hidden" name="update_event" value="1">
                 <input type="hidden" name="event_id" id="edit_event_id">
 
@@ -104,7 +104,7 @@
 
                     <div class="action-buttons">
                         <button type="button" class="btn btn-secondary" id="cancelEditEventBtn">Anuluj</button>
-                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                        <button type="button" class="btn btn-primary" id="editEventBtn">Zapisz zmiany</button>
                     </div>
                 </div>
             </form>
