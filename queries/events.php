@@ -8,10 +8,11 @@ $eventStmt = $pdo->query("
 $events = $eventStmt->fetchAll();
 
 $seatStmt = $pdo->query("
-    SELECT event_id, seat_number, user_id
-    FROM occupied_seats
-    WHERE status = 'AKTYWNA'
-    ORDER BY event_id, seat_number
+    SELECT os.event_id, os.seat_number, os.user_id, u.first_name, u.last_name
+    FROM occupied_seats os
+    JOIN users u ON u.id = os.user_id
+    WHERE os.status = 'AKTYWNA'
+    ORDER BY os.event_id, os.seat_number
 ");
 $occupiedSeatRows = $seatStmt->fetchAll();
 
@@ -25,5 +26,7 @@ foreach ($occupiedSeatRows as $row) {
     $occupiedSeatsByEvent[$eventId][] = [
         'seat_number' => (int) $row['seat_number'],
         'user_id' => (int) $row['user_id'],
+        'first_name' => $row['first_name'],
+        'last_name' => $row['last_name'],
     ];
 }
