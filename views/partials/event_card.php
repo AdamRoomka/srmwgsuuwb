@@ -18,7 +18,15 @@
         <?php endif; ?>
 
         <div class="top">
-            <i class="fa-regular fa-calendar-check <?php echo $statusClass; ?> icon"></i>
+            <i class="<?php
+            if ($statusClass === 'planned'):
+                echo "fa-regular fa-calendar-check ";
+            elseif ($statusClass === 'closed'):
+                echo "fa-solid fa-lock ";
+            elseif ($statusClass === 'cancelled'):
+                echo "fa-solid fa-ban ";
+            endif;
+            echo $statusClass; ?> icon"></i>
             <div class="status-badge <?php echo $statusClass; ?>">
                 <?php echo htmlspecialchars(statusLabel($event['status'])); ?>
             </div>
@@ -32,8 +40,15 @@
             <?php echo (int) $event['duration_minutes']; ?> min</p>
         <p><i class="fa-solid fa-chair"></i> <strong>Liczba miejsc:</strong> <?php echo (int) $event['total_seats']; ?></p>
         <p><i class="fa-solid fa-ban"></i> <strong>Zarezerwowane:</strong> <?php echo $occupiedCount; ?></p>
-        <p><i class="fa-solid fa-circle-check" style="color: green;"></i> <strong>Dostępne:</strong>
-            <?php echo $availableSeats; ?></p>
+        <p>
+            <i class="fa-solid fa-circle-check" style="color: <?php if ($availableSeats <= 0 && $event['status'] === 'PLANOWANE'):
+                echo "grey";
+            else:
+                echo "green";
+            endif; ?>;"></i>
+            <strong>Dostępne:</strong>
+            <?php echo $availableSeats; ?>
+        </p>
 
         <div class="event-actions">
             <?php if ($currentUser && $event['status'] === 'PLANOWANE' && $availableSeats > 0): ?>
@@ -48,7 +63,7 @@
             <?php elseif (!$currentUser && $event['status'] === 'PLANOWANE' && $availableSeats > 0): ?>
                 <p class="reserve-note">Zaloguj się, aby zarezerwować miejsca.</p>
             <?php elseif ($availableSeats <= 0 && $event['status'] === 'PLANOWANE'): ?>
-                <p class="blocked-msg">BRAK MIEJSC</p>
+                <p class="blocked-msg">Wszystkie miejsca zajęte</p>
             <?php else: ?>
                 <div class="blocked-msg">
                     <i class="fa-solid fa-info"></i>
