@@ -85,6 +85,8 @@ try {
     }
     $dbError = $e->getMessage();
 }
+
+require_once __DIR__ . '/register.php';
 ?>
 
 <!DOCTYPE html>
@@ -95,6 +97,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Rezerwacji - Aula Główna</title>
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
     <link rel="stylesheet" href="assets/css/seat-map.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
@@ -103,6 +106,7 @@ try {
         window.appData.currentUserId = window.currentUserId;
     </script>
     <script src="assets/js/app.js"></script>
+    <script src="assets/js/auth.js"></script>
     <script src="assets/js/seat-map.js"></script>
 </head>
 
