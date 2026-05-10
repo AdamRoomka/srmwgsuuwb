@@ -87,6 +87,8 @@ try {
 }
 
 require_once __DIR__ . '/register.php';
+
+updateLastActivity($pdo, $currentUser);
 ?>
 
 <!DOCTYPE html>
@@ -125,12 +127,13 @@ require_once __DIR__ . '/register.php';
 
     <div class="container">
         <?php if ($currentUser && $currentUser['role'] === 'ADMINISTRATOR'): ?>
-                        <div style="position: fixed; bottom: 20px; right: 20px;">
-                            <button type="button" class="btn btn-primary" style="border-radius: 40px; font-size: 20px; padding: 13px 18px;" id="openCreateEventModal">
-                            <i class="fa-solid fa-plus"></i>
-                            </button>
-                        </div>
-                    <?php endif; ?>
+            <div style="position: fixed; bottom: 20px; right: 20px;">
+                <button type="button" class="btn btn-primary"
+                    style="border-radius: 40px; font-size: 20px; padding: 13px 18px;" id="openCreateEventModal">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        <?php endif; ?>
         <div class="row view active">
             <div class="main">
                 <h2>Wybierz wydarzenie</h2>
@@ -188,23 +191,24 @@ require_once __DIR__ . '/register.php';
 
                                     <div class="place">Moje miejsca:</div>
                                     <div class="seat-card">
-                                    <?php 
-                                    $seats = explode(',', $reservation['seat_numbers']); 
+                                        <?php
+                                        $seats = explode(',', $reservation['seat_numbers']);
 
-                                    foreach ($seats as $seat): 
-                                        $cleanSeat = trim($seat); 
-                                        ?>
-                                        <div class="seat-item">
-                                            <?php echo htmlspecialchars($cleanSeat); ?>
-                                        </div>
-                                    <?php endforeach; ?>
+                                        foreach ($seats as $seat):
+                                            $cleanSeat = trim($seat);
+                                            ?>
+                                            <div class="seat-item">
+                                                <?php echo htmlspecialchars($cleanSeat); ?>
+                                            </div>
+                                        <?php endforeach; ?>
                                     </div>
 
                                     <form class="remove_reservation" method="post"
                                         onsubmit="return confirm('Czy na pewno chcesz usunąć swoją rezerwację dla tego wydarzenia?');">
                                         <input type="hidden" name="cancel_own_reservation" value="1">
                                         <input type="hidden" name="event_id" value="<?php echo (int) $reservation['event_id']; ?>">
-                                        <button type="submit" class="btn btn-secondary"><i class="fa-regular fa-trash-can"></i> Usuń moją rezerwację</button>
+                                        <button type="submit" class="btn btn-secondary"><i class="fa-regular fa-trash-can"></i> Usuń
+                                            moją rezerwację</button>
                                     </form>
                                 </div>
                             <?php endforeach; ?>
