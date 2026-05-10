@@ -45,9 +45,10 @@ try {
     $currentUser = $_SESSION['user'] ?? null;
 
     $userListStmt = $pdo->query("
-        SELECT id, first_name, last_name, email, created_at, last_activity
-        FROM users
-        ORDER BY first_name ASC, last_name ASC, email ASC
+        SELECT u.id, u.first_name, u.last_name, u.email, u.created_at, u.last_activity, r.name as role_name
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.id
+        ORDER BY u.first_name ASC, u.last_name ASC
     ");
     $usersForAdminSeatAssignment = $userListStmt->fetchAll();
 
@@ -113,15 +114,17 @@ $regularUsersCount = $pdo->query("
 
 function renderUserRows($users)
 {
-    foreach ($users as $userItem): ?>
-        <tr class="user-row" data-role="<?= $userItem['id'] == 1 ? 'ADMINISTRATOR' : 'USER'; ?>"
+    foreach ($users as $userItem):
+        $isAdmin = (strtoupper($userItem['role_name']) === 'ADMINISTRATOR');
+        ?>
+        <tr class="user-row" data-role="<?= $isAdmin ? 'ADMINISTRATOR' : 'USER'; ?>"
             data-search="<?= strtolower($userItem['first_name'] . ' ' . $userItem['last_name'] . ' ' . $userItem['email']); ?>">
             <td>
                 <div class="user-info">
                     <div class="user-avatar"><?= strtoupper(substr($userItem['first_name'], 0, 1)); ?></div>
                     <div class="user-details">
                         <strong><?= htmlspecialchars($userItem['first_name'] . ' ' . $userItem['last_name']); ?></strong>
-                        <span><?= $userItem['id'] == 1 ? 'Administrator' : 'Użytkownik'; ?></span>
+                        <span><?= $isAdmin ? 'Administrator' : 'Użytkownik'; ?></span>
                     </div>
                 </div>
             </td>
@@ -129,16 +132,17 @@ function renderUserRows($users)
                 <div class="emain-info"><?= htmlspecialchars($userItem['email']); ?></div>
             </td>
             <td>
-                <select class="role-select">
-                    <option value="USER" <?= $userItem['id'] != 1 ? 'selected' : ''; ?>>Użytkownik</option>
-                    <option value="ADMINISTRATOR" <?= $userItem['id'] == 1 ? 'selected' : ''; ?>>Administrator</option>
+                <select class="role-select" data-user-id="<?= $userItem['id']; ?>"
+                    data-original-role="<?= $isAdmin ? 'ADMINISTRATOR' : 'UŻYTKOWNIK'; ?>">
+                    <option value="UŻYTKOWNIK" <?= !$isAdmin ? 'selected' : ''; ?>>Użytkownik</option>
+                    <option value="ADMINISTRATOR" <?= $isAdmin ? 'selected' : ''; ?>>Administrator</option>
                 </select>
             </td>
             <td><?= $userItem['last_activity'] ? (new DateTime($userItem['last_activity']))->format('d.m.Y H:i') : '-'; ?></td>
             <td><?= (new DateTime($userItem['created_at']))->format('d.m.Y'); ?></td>
             <td>
                 <div class="table-actions">
-                    <button class="action-button reset-password-button disabled"><i class="fa-solid fa-key"></i> Resetuj
+                    <button class="action-button reset-password-button button-disabled"><i class="fa-solid fa-key"></i> Resetuj
                         hasło</button>
                     <button class="action-button delete-user-button"><i class="fa-solid fa-trash"></i> Usuń</button>
                 </div>
@@ -148,8 +152,39 @@ function renderUserRows($users)
 }
 
 if (isset($_GET['ajax_refresh'])) {
-    $stmt = $pdo->query("SELECT id, first_name, last_name, email, created_at, last_activity FROM users ORDER BY first_name ASC, last_name ASC, email ASC");
+    $stmt = $pdo->query("
+        SELECT u.id, u.first_name, u.last_name, u.email, u.created_at, u.last_activity, r.name as role_name 
+        FROM users u 
+        LEFT JOIN roles r ON u.role_id = r.id 
+        ORDER BY u.first_name ASC, u.last_name ASC
+    ");
     renderUserRows($stmt->fetchAll());
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_roles'])) {
+    $updates = json_decode($_POST['updates'], true);
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("
+            UPDATE users 
+            SET role_id = (SELECT id FROM roles WHERE name = :role_name LIMIT 1) 
+            WHERE id = :user_id
+        ");
+
+        foreach ($updates as $userId => $newRole) {
+            $stmt->execute([
+                'role_name' => $newRole,
+                'user_id' => (int) $userId
+            ]);
+        }
+        $pdo->commit();
+        echo json_encode(['status' => 'success']);
+    } catch (Exception $e) {
+        if ($pdo->inTransaction())
+            $pdo->rollBack();
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
     exit;
 }
 
@@ -239,7 +274,7 @@ updateLastActivity($pdo, $currentUser);
                     </div>
                 </div>
 
-                <div class="admin-stat-card disabled">
+                <div class="admin-stat-card button-disabled">
                     <div class="admin-stat-icon red">
                         <i class="fa-solid fa-envelope"></i>
                     </div>
@@ -272,6 +307,12 @@ updateLastActivity($pdo, $currentUser);
                         <i class="fa-solid fa-rotate-right"></i>
                         Odśwież
                     </button>
+
+                    <button id="saveChangesBtn" class="refresh-button button-disabled" disabled>
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Zapisz zmiany
+                    </button>
+
                 </div>
             </div>
 
@@ -311,15 +352,88 @@ updateLastActivity($pdo, $currentUser);
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('userSearchInput');
             const roleFilter = document.getElementById('roleFilter');
-            let rows = Array.from(document.querySelectorAll('.user-row'));
             const paginationContainer = document.getElementById('paginationPages');
             const previousButton = document.getElementById('prevPageButton');
             const nextButton = document.getElementById('nextPageButton');
             const refreshButton = document.getElementById('refreshTable');
+            const saveBtn = document.getElementById('saveChangesBtn');
+            const tbody = document.getElementById('usersTableBody');
+
+            let rows = Array.from(document.querySelectorAll('.user-row'));
             const itemsPerPage = 6;
             let currentPage = 1;
             let visibleRows = [...rows];
+            let changedRoles = {};
 
+            function updateSaveButtonState() {
+                const hasChanges = Object.keys(changedRoles).length > 0;
+                saveBtn.disabled = !hasChanges;
+                if (hasChanges) {
+                    saveBtn.classList.remove('button-disabled');
+                } else {
+                    saveBtn.classList.add('button-disabled');
+                }
+            }
+
+            tbody.addEventListener('change', (e) => {
+                if (e.target.classList.contains('role-select')) {
+                    const select = e.target;
+                    const userId = select.dataset.userId;
+                    const originalRole = select.dataset.originalRole;
+                    const newValue = select.value;
+
+                    if (newValue !== originalRole) {
+                        changedRoles[userId] = newValue;
+                        select.style.border = "2px solid #ff9800";
+                    } else {
+                        delete changedRoles[userId];
+                        select.style.border = "";
+                    }
+                    updateSaveButtonState();
+                }
+            });
+
+            saveBtn.addEventListener('click', () => {
+                const count = Object.keys(changedRoles).length;
+                if (count === 0) return;
+
+                const confirmation = prompt(`Próbujesz zmienić uprawnienia dla ${count} użytkowników.\n\nAby zatwierdzić, wpisz słowo: POTWIERDZAM`);
+
+                if (confirmation !== "POTWIERDZAM") {
+                    alert("Błędne potwierdzenie. Zmiany nie zostały wysłane.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('update_roles', '1');
+                formData.append('updates', JSON.stringify(changedRoles));
+
+                const originalContent = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Zapisywanie...';
+                saveBtn.disabled = true;
+
+                fetch(window.location.pathname, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Zmiany zostały zapisane pomyślnie!');
+                            location.reload();
+                        } else {
+                            alert('Błąd: ' + data.message);
+                            saveBtn.innerHTML = originalContent;
+                            updateSaveButtonState();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        alert('Wystąpił błąd podczas komunikacji z serwerem.');
+                        saveBtn.innerHTML = originalContent;
+                        updateSaveButtonState();
+                    });
+            });
 
             refreshButton.addEventListener('click', () => {
                 const icon = refreshButton.querySelector('i');
@@ -328,11 +442,11 @@ updateLastActivity($pdo, $currentUser);
                 fetch(window.location.pathname + '?ajax_refresh=1')
                     .then(res => res.text())
                     .then(html => {
-                        const tbody = document.getElementById('usersTableBody');
                         tbody.innerHTML = html;
                         rows = Array.from(tbody.querySelectorAll('.user-row'));
+                        changedRoles = {};
+                        updateSaveButtonState();
                         filterUsers();
-
                         setTimeout(() => icon.classList.remove('fa-spin'), 600);
                     });
             });
@@ -355,48 +469,27 @@ updateLastActivity($pdo, $currentUser);
             }
 
             function renderPage() {
-                rows.forEach(row => {
-                    row.style.display = 'none';
-                });
-
+                rows.forEach(row => { row.style.display = 'none'; });
                 const start = (currentPage - 1) * itemsPerPage;
                 const end = start + itemsPerPage;
                 const pageItems = visibleRows.slice(start, end);
 
-                pageItems.forEach(row => {
-                    row.style.display = '';
-                });
+                pageItems.forEach(row => { row.style.display = ''; });
 
-                const maxPage = Math.ceil(
-                    visibleRows.length /
-                    itemsPerPage
-                );
-
+                const maxPage = Math.ceil(visibleRows.length / itemsPerPage);
                 previousButton.disabled = currentPage === 1;
                 nextButton.disabled = currentPage === maxPage || maxPage === 0;
             }
 
             function generatePagination() {
                 paginationContainer.innerHTML = '';
-
-                const totalPages = Math.ceil(
-                    visibleRows.length /
-                    itemsPerPage
-                );
-
-                if (totalPages <= 1) {
-                    return;
-                }
+                const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
+                if (totalPages <= 1) return;
 
                 for (let i = 1; i <= totalPages; i++) {
                     const button = document.createElement('button');
-                    button.className = 'pagination-page';
+                    button.className = 'pagination-page' + (i === currentPage ? ' active' : '');
                     button.textContent = i;
-
-                    if (i === currentPage) {
-                        button.classList.add('active');
-                    }
-
                     button.addEventListener('click', () => {
                         currentPage = i;
                         renderPage();
@@ -415,24 +508,17 @@ updateLastActivity($pdo, $currentUser);
             });
 
             nextButton.addEventListener('click', () => {
-                const maxPage = Math.ceil(
-                    visibleRows.length /
-                    itemsPerPage
-                );
+                const maxPage = Math.ceil(visibleRows.length / itemsPerPage);
                 if (currentPage < maxPage) {
                     currentPage++;
                     renderPage();
                     generatePagination();
                 }
             });
-            searchInput.addEventListener(
-                'input',
-                filterUsers
-            );
-            roleFilter.addEventListener(
-                'change',
-                filterUsers
-            );
+
+            searchInput.addEventListener('input', filterUsers);
+            roleFilter.addEventListener('change', filterUsers);
+
             filterUsers();
         });
     </script>

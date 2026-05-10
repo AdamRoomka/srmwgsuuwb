@@ -37,22 +37,6 @@
     box-shadow: 0 5px 18px rgba(0, 0, 0, 0.04);
 }
 
-.admin-stat-card.disabled {
-    background-color: #f5f5f5;
-    background-image: linear-gradient(45deg,
-            rgba(0, 0, 0, 0.05) 25%,
-            transparent 25%,
-            transparent 50%,
-            rgba(0, 0, 0, 0.05) 50%,
-            rgba(0, 0, 0, 0.05) 75%,
-            transparent 75%,
-            transparent);
-    background-size: 20px 20px;
-    cursor: not-allowed;
-    opacity: 0.8;
-    filter: grayscale(1);
-}
-
 .admin-stat-icon {
     width: 64px;
     height: 64px;
@@ -291,7 +275,23 @@
     transition: 0.2s;
 }
 
-.reset-password-button.disabled {
+.button-disabled {
+    background-color: #f5f5f5 !important;
+    background-image: linear-gradient(45deg,
+            rgba(0, 0, 0, 0.05) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.05) 50%,
+            rgba(0, 0, 0, 0.05) 75%,
+            transparent 75%,
+            transparent) !important;
+    background-size: 20px 20px !important;
+    cursor: not-allowed !important;
+    opacity: 0.8 !important;
+    filter: grayscale(1) !important;
+}
+
+.button-disabled:hover {
     background-color: #f5f5f5;
     background-image: linear-gradient(45deg,
             rgba(0, 0, 0, 0.05) 25%,
@@ -305,6 +305,7 @@
     cursor: not-allowed;
     opacity: 0.8;
     filter: grayscale(1);
+    color: #662d91 !important;
 }
 
 .reset-password-button:hover {
