@@ -112,10 +112,11 @@ $regularUsersCount = $pdo->query("
     WHERE r.name != 'admin' AND r.name != 'Administrator'
 ")->fetchColumn();
 
-function renderUserRows($users)
+function renderUserRows($users, $loggedUserId)
 {
     foreach ($users as $userItem):
         $isAdmin = (strtoupper($userItem['role_name']) === 'ADMINISTRATOR');
+        $isMe = ((int) $userItem['id'] === (int) $loggedUserId);
         ?>
         <tr class="user-row" data-role="<?= $isAdmin ? 'ADMINISTRATOR' : 'USER'; ?>"
             data-search="<?= strtolower($userItem['first_name'] . ' ' . $userItem['last_name'] . ' ' . $userItem['email']); ?>">
@@ -133,7 +134,7 @@ function renderUserRows($users)
             </td>
             <td>
                 <select class="role-select" data-user-id="<?= $userItem['id']; ?>"
-                    data-original-role="<?= $isAdmin ? 'ADMINISTRATOR' : 'UŻYTKOWNIK'; ?>">
+                    data-original-role="<?= $isAdmin ? 'ADMINISTRATOR' : 'UŻYTKOWNIK'; ?>" <?= $isMe ? 'disabled title="Nie możesz zmienić własnej roli"' : ''; ?>>
                     <option value="UŻYTKOWNIK" <?= !$isAdmin ? 'selected' : ''; ?>>Użytkownik</option>
                     <option value="ADMINISTRATOR" <?= $isAdmin ? 'selected' : ''; ?>>Administrator</option>
                 </select>
@@ -158,7 +159,7 @@ if (isset($_GET['ajax_refresh'])) {
         LEFT JOIN roles r ON u.role_id = r.id 
         ORDER BY u.first_name ASC, u.last_name ASC
     ");
-    renderUserRows($stmt->fetchAll());
+    renderUserRows($stmt->fetchAll(), $currentUser['id']);
     exit;
 }
 
@@ -173,6 +174,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_roles'])) {
         ");
 
         foreach ($updates as $userId => $newRole) {
+            if ((int) $userId === (int) $currentUser['id']) {
+                continue;
+            }
+
             $stmt->execute([
                 'role_name' => $newRole,
                 'user_id' => (int) $userId
@@ -330,7 +335,7 @@ updateLastActivity($pdo, $currentUser);
                     </thead>
 
                     <tbody id="usersTableBody">
-                        <?php renderUserRows($usersForAdminSeatAssignment); ?>
+                        <?php renderUserRows($usersForAdminSeatAssignment, $currentUser['id']); ?>
                     </tbody>
                 </table>
             </div>
