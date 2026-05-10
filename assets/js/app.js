@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeEditEventModal = document.getElementById('closeEditEventModal');
     const cancelEditEventBtn = document.getElementById('cancelEditEventBtn');
     const editEventBtn = document.getElementById('editEventBtn');
+    const editEventForm = document.getElementById('editEventForm');
 
     const editEventId = document.getElementById('edit_event_id');
     const editEventName = document.getElementById('edit_event_name');
@@ -133,8 +134,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    if (editEventBtn && editEventModal) {
+        editEventBtn.addEventListener('click', function (e) {
+            if (!checkEditEventFormValidity()) {
+                e.preventDefault();
+                return;
+            }
+
+            if (editEventForm) {
+                editEventForm.submit();
+            }
+        });
+    }
+
     if (editEventModal) {
-        editEventModal.addEventListener('click', function (e) {
+        editEventBtn.addEventListener('click', function (e) {
             if (e.target === editEventModal) {
                 App.closeModal(editEventModal);
             }
@@ -178,14 +192,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.preventDefault();
             } else {
                 createEventForm.submit();
-            }
-        });
-    }
-
-    if (editEventBtn && editEventModal) {
-        editEventBtn.addEventListener('click', function (e) {
-            if (!checkEditEventFormValidity()) {
-                e.preventDefault();
             }
         });
     }
