@@ -26,6 +26,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    function showFloatingNotification(message, type = 'error') {
+        if (!message) return;
+        const existing = document.getElementById('toastNotification');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'toastNotification';
+        toast.className = `toast-notification toast-${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">${message}</div>
+            <button id="closeToast" class="toast-close" aria-label="Zamknij">&times;</button>
+        `;
+        document.body.appendChild(toast);
+
+        const closeBtn = toast.querySelector('#closeToast');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                toast.remove();
+            });
+        }
+
+        setTimeout(function () {
+            if (toast.parentNode) toast.remove();
+        }, 5000);
+    }
+
     const loginModal = document.getElementById('loginModal');
     const openLoginModalBtn = document.getElementById('openLoginModalBtn');
     const closeLoginModal = document.getElementById('closeLoginModal');
@@ -53,6 +79,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const editEventModal = document.getElementById('editEventModal');
     const closeEditEventModal = document.getElementById('closeEditEventModal');
     const cancelEditEventBtn = document.getElementById('cancelEditEventBtn');
+    const editEventBtn = document.getElementById('editEventBtn');
+    const editEventForm = document.getElementById('editEventForm');
 
     const editEventId = document.getElementById('edit_event_id');
     const editEventName = document.getElementById('edit_event_name');
@@ -62,9 +90,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const editEventTotalSeats = document.getElementById('edit_event_total_seats');
     const editEventStatus = document.getElementById('edit_event_status');
 
+    function clearValidationState(container) {
+        if (!container) return;
+
+        container.querySelectorAll('.error').forEach(function (element) {
+            element.classList.remove('error');
+        });
+
+        container.querySelectorAll('.input-error').forEach(function (element) {
+            element.classList.remove('input-error');
+        });
+    }
+
     document.querySelectorAll('.open-edit-event-modal').forEach(button => {
         button.addEventListener('click', function () {
             if (!editEventModal) return;
+
+            clearValidationState(editEventModal);
 
             editEventId.value = this.dataset.eventId || '';
             editEventName.value = this.dataset.eventName || '';
@@ -80,18 +122,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (closeEditEventModal && editEventModal) {
         closeEditEventModal.addEventListener('click', function () {
+            clearValidationState(editEventModal);
             App.closeModal(editEventModal);
         });
     }
 
     if (cancelEditEventBtn && editEventModal) {
         cancelEditEventBtn.addEventListener('click', function () {
+            clearValidationState(editEventModal);
             App.closeModal(editEventModal);
         });
     }
 
+    if (editEventBtn && editEventModal) {
+        editEventBtn.addEventListener('click', function (e) {
+            if (!checkEditEventFormValidity()) {
+                e.preventDefault();
+                return;
+            }
+
+            if (editEventForm) {
+                editEventForm.submit();
+            }
+        });
+    }
+
     if (editEventModal) {
-        editEventModal.addEventListener('click', function (e) {
+        editEventBtn.addEventListener('click', function (e) {
             if (e.target === editEventModal) {
                 App.closeModal(editEventModal);
             }
@@ -104,23 +161,182 @@ document.addEventListener('DOMContentLoaded', function () {
     const openCreateEventModal = document.getElementById('openCreateEventModal');
     const closeCreateEventModal = document.getElementById('closeCreateEventModal');
     const cancelCreateEventBtn = document.getElementById('cancelCreateEventBtn');
+    const createEventBtn = document.getElementById('createEventBtn');
 
     if (openCreateEventModal && createEventModal) {
         openCreateEventModal.addEventListener('click', function () {
+            clearValidationState(createEventModal);
             App.openModal(createEventModal);
         });
     }
 
     if (closeCreateEventModal && createEventModal) {
         closeCreateEventModal.addEventListener('click', function () {
+            clearValidationState(createEventModal);
             App.closeModal(createEventModal);
         });
     }
 
     if (cancelCreateEventBtn && createEventModal) {
         cancelCreateEventBtn.addEventListener('click', function () {
+            clearValidationState(createEventModal);
             App.closeModal(createEventModal);
         });
+    }
+
+    const createEventForm = document.getElementById('createEventForm');
+
+    if (createEventBtn && createEventModal) {
+        createEventBtn.addEventListener('click', function (e) {
+            if (!checkCreateEventFormValidity()) {
+                e.preventDefault();
+            } else {
+                createEventForm.submit();
+            }
+        });
+    }
+
+    function checkCreateEventFormValidity() {
+        const form = document.getElementById('createEventForm');
+        if (!form) return false;
+
+        const name = form.querySelector('#event_name');
+        const startAt = form.querySelector('#event_start_at');
+        const duration = form.querySelector('#event_duration_minutes');
+        const totalSeats = form.querySelector('#event_total_seats');
+        const description = form.querySelector('#event_description');
+        const status = form.querySelector('#event_status');
+
+        let isValid = true;
+        let errorMessages = "";
+
+        function setFirstError(message) {
+            if (!errorMessages) {
+                errorMessages = message;
+            }
+            isValid = false;
+        }
+
+        if (!name || !name.value.trim()) {
+            setFirstError('Nazwa wydarzenia jest wymagana.');
+            messageToastSet("event_name");
+        }
+
+        if (!description || !description.value.trim()) {
+            setFirstError('Opis wydarzenia jest wymagany.');
+            messageToastSet("event_description");
+        }
+
+        if (!startAt || !startAt.value.trim()) {
+            setFirstError('Data i godzina rozpoczęcia są wymagane.');
+            messageToastSet("event_start_at");
+        }
+
+        if (!duration || !duration.value.trim()) {
+            setFirstError('Czas trwania wydarzenia jest wymagany.');
+            messageToastSet("event_duration_minutes");
+        }
+
+        if (!/^\d+$/.test(duration.value.trim())) {
+            setFirstError('Czas trwania musi być liczbą.');
+            messageToastSet("event_duration_minutes");
+        }
+
+        if (!totalSeats || !totalSeats.value.trim()) {
+            setFirstError('Liczba miejsc jest wymagana.');
+            messageToastSet("event_total_seats");
+        }
+
+        if (!/^\d+$/.test(totalSeats.value.trim())) {
+            setFirstError('Liczba miejsc musi być liczbą.');
+            messageToastSet("event_total_seats");
+        }
+
+        if (!status || !status.value.trim()) {
+            setFirstError('Status wydarzenia jest wymagany.');
+            messageToastSet("event_status");
+        }
+
+        if (!isValid && errorMessages) {
+            showFloatingNotification(errorMessages, 'error');
+        }
+
+        return isValid;
+    }
+
+    function checkEditEventFormValidity() {
+        const form = document.getElementById('editEventForm');
+        if (!form) return false;
+
+        const name = form.querySelector('#edit_event_name');
+        const startAt = form.querySelector('#edit_event_start_at');
+        const duration = form.querySelector('#edit_event_duration_minutes');
+        const totalSeats = form.querySelector('#edit_event_total_seats');
+        const description = form.querySelector('#edit_event_description');
+        const status = form.querySelector('#edit_event_status');
+
+        let isValid = true;
+        let errorMessages = "";
+
+        function setFirstError(message) {
+            if (!errorMessages) {
+                errorMessages = message;
+            }
+            isValid = false;
+        }
+
+        if (!name || !name.value.trim()) {
+            setFirstError('Nazwa wydarzenia jest wymagana.');
+            messageToastSet('edit_event_name');
+        }
+
+        if (!description || !description.value.trim()) {
+            setFirstError('Opis wydarzenia jest wymagany.');
+            messageToastSet('edit_event_description');
+        }
+
+        if (!startAt || !startAt.value.trim()) {
+            setFirstError('Data i godzina rozpoczęcia są wymagane.');
+            messageToastSet('edit_event_start_at');
+        }
+
+        if (!duration || !duration.value.trim()) {
+            setFirstError('Czas trwania wydarzenia jest wymagany.');
+            messageToastSet('edit_event_duration_minutes');
+        }
+
+        if (duration && !/^\d+$/.test(duration.value.trim())) {
+            setFirstError('Czas trwania musi być liczbą.');
+            messageToastSet('edit_event_duration_minutes');
+        }
+
+        if (!totalSeats || !totalSeats.value.trim()) {
+            setFirstError('Liczba miejsc jest wymagana.');
+            messageToastSet('edit_event_total_seats');
+        }
+
+        if (totalSeats && !/^\d+$/.test(totalSeats.value.trim())) {
+            setFirstError('Liczba miejsc musi być liczbą.');
+            messageToastSet('edit_event_total_seats');
+        }
+
+        if (!status || !status.value.trim()) {
+            setFirstError('Status wydarzenia jest wymagany.');
+            messageToastSet('edit_event_status');
+        }
+
+        if (!isValid && errorMessages) {
+            showFloatingNotification(errorMessages, 'error');
+        }
+
+        return isValid;
+    }
+
+    function messageToastSet(labelname) {
+        const label = document.getElementById(labelname);
+        if (label) {
+            label.classList.add("error");
+        }
     }
 
     if (createEventModal) {
@@ -168,7 +384,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Handle reservations list modal
     document.addEventListener('click', function (e) {
         const btn = e.target.closest('.open-reservations-list-modal');
         if (!btn) return;
@@ -196,14 +411,12 @@ document.addEventListener('DOMContentLoaded', function () {
             reservationsListModalTitle.textContent = 'Rezerwacje: ' + eventName;
         }
 
-        // Render reservations list
         if (reservationsList) {
             reservationsList.innerHTML = '';
 
             if (occupiedSeatsData.length === 0) {
                 reservationsList.innerHTML = '<p style="text-align: center; color: #666;">Brak rezerwacji</p>';
             } else {
-                // Group by user
                 const usersMap = {};
                 occupiedSeatsData.forEach(seat => {
                     const userId = seat.user_id || 'null';
@@ -217,7 +430,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     usersMap[userId].seats.push(seat.seat_number);
                 });
 
-                // Create list
                 const list = document.createElement('div');
                 list.className = 'reservations-items';
 
@@ -245,14 +457,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Render seat map for the current event every time, even when there are no reservations.
         if (reservationsViewSeatMap) {
             const occupiedSeatNumbers = occupiedSeatsData
                 .map(s => parseInt(s.seat_number, 10))
                 .filter(Number.isFinite);
             const occupiedMax = occupiedSeatNumbers.length ? Math.max(...occupiedSeatNumbers) : 0;
             const totalSeats = Math.max(totalSeatsFromButton, occupiedMax);
-            
+
             const hallLayout = [
                 { type: 'row', blocks: [4, 2, 3, 2, 3, 2, 7] },
                 { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
@@ -262,7 +473,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 { type: 'row', blocks: [0, 7, 3, 1, 0, 5, 4] }
             ];
 
-            // Build hall structure
             let seatNumber = 1;
             const rows = [];
             hallLayout.forEach(layoutRow => {
@@ -287,7 +497,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 rows.push({ type: 'row', slots });
             });
 
-            // Render seats
             reservationsViewSeatMap.innerHTML = '';
             const hallBody = document.createElement('div');
             hallBody.className = 'hall-body';
@@ -312,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     seat.textContent = seatNum;
 
                     const isOccupied = occupiedSeatNumbers.includes(seatNum);
-                    
+
                     if (isOccupied) {
                         seat.classList.add('occupied');
                         const occupiedSeat = occupiedSeatsData.find(s => parseInt(s.seat_number, 10) === seatNum);
@@ -335,23 +544,17 @@ document.addEventListener('DOMContentLoaded', function () {
             reservationsViewSeatMap.appendChild(hallBody);
         }
 
-        // Add click handler for reservation items
         const reservationItems = reservationsList.querySelectorAll('.reservation-item');
         reservationItems.forEach(item => {
             item.addEventListener('click', function () {
-                // Remove active class from all items
                 reservationItems.forEach(i => i.classList.remove('active'));
-                // Add active class to clicked item
                 this.classList.add('active');
 
-                // Get seats for this user
                 const userSeats = this.dataset.seats.split(',').map(s => parseInt(s.trim()));
 
-                // Remove highlights from all seats
                 const allSeats = reservationsViewSeatMap.querySelectorAll('.seat');
                 allSeats.forEach(seat => seat.classList.remove('highlighted'));
 
-                // Highlight user's seats
                 userSeats.forEach(seatNum => {
                     const seat = reservationsViewSeatMap.querySelector(`[data-seat-number="${seatNum}"]`);
                     if (seat) {
@@ -361,10 +564,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Open modal
         App.openModal(reservationsListModal);
 
-        // Setup close handlers
         const closeReservationsListModal = document.getElementById('closeReservationsListModal');
         const closeReservationsListBtn = document.getElementById('closeReservationsListBtn');
 
