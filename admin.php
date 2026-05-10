@@ -144,8 +144,8 @@ function renderUserRows($users, $loggedUserId)
             <td>
                 <div class="table-actions">
                     <button class="action-button reset-password-button button-disabled"><i class="fa-solid fa-key"></i> Resetuj
-                        hasło</button>
-                    <button class="action-button delete-user-button"><i class="fa-solid fa-trash"></i> Usuń</button>
+                        hasło
+                    </button>
                 </div>
             </td>
         </tr>
