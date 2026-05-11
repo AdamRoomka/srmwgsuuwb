@@ -1,13 +1,14 @@
 .seat-map,
 #manageSeatMap {
+    position: relative;
+    background-image: url("../../IMG/sala-glowna.jpg");
+    background-repeat: no-repeat;
+    background-position: top left;
+    background-size: 885px;
+    background-attachment: local;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    overflow-x: auto;
-    overflow-y: visible;
-    padding: 16px 24px;
-    box-sizing: border-box;
+    height: 595px;
+    overflow: auto;
 }
 
 .hall-stage {
@@ -39,12 +40,6 @@
     align-items: center;
 }
 
-.seat-spacer {
-    width: 38px;
-    height: 38px;
-    visibility: hidden;
-}
-
 .seat {
     width: 38px;
     height: 38px;
@@ -62,15 +57,19 @@
 }
 
 .seat-legend {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  margin: 0 5px 0 15px;
-  vertical-align: middle;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    margin: 0 5px 0 15px;
+    vertical-align: middle;
 }
 
-.seat,
+.seat {
+    position: absolute;
+    background: #4caf50;
+}
+
 .seat-legend {
     background: #4caf50;
 }
@@ -81,7 +80,6 @@
     background: #f4c542;
     border-color: #c89b17;
     color: #111;
-    transform: scale(1.08);
 }
 
 .seat-legend.occupied,
@@ -113,6 +111,551 @@
 }
 
 .legend {
-  text-align: center;
-  margin-bottom: 30px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.seat[data-seat-number="1"] {
+    top: 193px;
+    left: 36px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="2"] {
+    top: 208px;
+    left: 75px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="3"] {
+    top: 222px;
+    left: 113px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="4"] {
+    top: 237px;
+    left: 152px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="5"] {
+    top: 240px;
+    left: 244px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="6"] {
+    top: 240px;
+    left: 286px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="7"] {
+    top: 240px;
+    left: 327px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="8"] {
+    top: 236px;
+    left: 428px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="9"] {
+    top: 236px;
+    left: 470px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="10"] {
+    top: 236px;
+    left: 511px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="11"] {
+    top: 250px;
+    left: 591px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="12"] {
+    top: 243px;
+    left: 627px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="13"] {
+    top: 236px;
+    left: 661px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="14"] {
+    top: 229px;
+    left: 696px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="15"] {
+    top: 222px;
+    left: 732px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="16"] {
+    top: 215px;
+    left: 767px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="17"] {
+    top: 208px;
+    left: 802px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="18"] {
+    top: 258px;
+    left: 36px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="19"] {
+    top: 272px;
+    left: 75px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="20"] {
+    top: 287px;
+    left: 113px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="21"] {
+    top: 302px;
+    left: 152px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+
+.seat[data-seat-number="22"] {
+    top: 299px;
+    left: 244px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="23"] {
+    top: 299px;
+    left: 286px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="24"] {
+    top: 299px;
+    left: 327px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="25"] {
+    top: 299px;
+    left: 369px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="26"] {
+    top: 299px;
+    left: 428px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="27"] {
+    top: 299px;
+    left: 470px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="28"] {
+    top: 299px;
+    left: 511px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="29"] {
+    top: 312px;
+    left: 580px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="30"] {
+    top: 305px;
+    left: 620px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="31"] {
+    top: 297px;
+    left: 661px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="32"] {
+    top: 284px;
+    left: 722px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="33"] {
+    top: 277px;
+    left: 762px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="34"] {
+    top: 269px;
+    left: 802px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="35"] {
+    top: 318px;
+    left: 35px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="36"] {
+    top: 333px;
+    left: 74px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="37"] {
+    top: 347px;
+    left: 113px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="38"] {
+    top: 362px;
+    left: 152px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="39"] {
+    top: 363px;
+    left: 244px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="40"] {
+    top: 363px;
+    left: 286px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="41"] {
+    top: 363px;
+    left: 327px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="42"] {
+    top: 363px;
+    left: 369px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="43"] {
+    top: 363px;
+    left: 428px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="44"] {
+    top: 363px;
+    left: 470px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="45"] {
+    top: 363px;
+    left: 511px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="46"] {
+    top: 366px;
+    left: 592px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="47"] {
+    top: 359px;
+    left: 631px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="48"] {
+    top: 351px;
+    left: 671px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="49"] {
+    top: 340px;
+    left: 722px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="50"] {
+    top: 333px;
+    left: 762px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="51"] {
+    top: 325px;
+    left: 802px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="52"] {
+    top: 380px;
+    left: 35px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="53"] {
+    top: 394px;
+    left: 75px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="54"] {
+    top: 408px;
+    left: 114px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="55"] {
+    top: 423px;
+    left: 152px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="56"] {
+    top: 422px;
+    left: 244px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="57"] {
+    top: 422px;
+    left: 286px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="58"] {
+    top: 422px;
+    left: 327px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="59"] {
+    top: 422px;
+    left: 369px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="60"] {
+    top: 422px;
+    left: 428px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="61"] {
+    top: 422px;
+    left: 470px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="62"] {
+    top: 422px;
+    left: 511px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="63"] {
+    top: 422px;
+    left: 606px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="64"] {
+    top: 415px;
+    left: 646px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="65"] {
+    top: 408px;
+    left: 686px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="66"] {
+    top: 400px;
+    left: 723px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="67"] {
+    top: 393px;
+    left: 762px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="68"] {
+    top: 385px;
+    left: 802px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="69"] {
+    top: 446px;
+    left: 36px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="70"] {
+    top: 460px;
+    left: 75px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="71"] {
+    top: 474px;
+    left: 114px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="72"] {
+    top: 489px;
+    left: 152px;
+    transform: rotate(20deg) scale(0.9);
+}
+
+.seat[data-seat-number="73"] {
+    top: 477px;
+    left: 246px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="74"] {
+    top: 477px;
+    left: 286px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="75"] {
+    top: 477px;
+    left: 327px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="76"] {
+    top: 477px;
+    left: 369px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="77"] {
+    top: 477px;
+    left: 428px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="78"] {
+    top: 477px;
+    left: 470px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="79"] {
+    top: 477px;
+    left: 511px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="80"] {
+    top: 467px;
+    left: 678px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="81"] {
+    top: 460px;
+    left: 718px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="82"] {
+    top: 452px;
+    left: 757px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="83"] {
+    top: 444px;
+    left: 797px;
+    transform: rotate(-11deg) scale(0.9);
+}
+
+.seat[data-seat-number="84"] {
+    top: 529px;
+    left: 288px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="85"] {
+    top: 529px;
+    left: 330px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="86"] {
+    top: 529px;
+    left: 371px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="87"] {
+    top: 519px;
+    left: 685px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="88"] {
+    top: 520px;
+    left: 726px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="89"] {
+    top: 520px;
+    left: 768px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="90"] {
+    top: 520px;
+    left: 809px;
+    transform: rotate(0deg) scale(0.9);
+}
+
+.seat[data-seat-number="undefined"] {
+    display: none;
 }

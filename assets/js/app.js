@@ -465,12 +465,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const totalSeats = Math.max(totalSeatsFromButton, occupiedMax);
 
             const hallLayout = [
-                { type: 'row', blocks: [4, 2, 3, 2, 3, 2, 7] },
-                { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
-                { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
-                { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
-                { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 4] },
-                { type: 'row', blocks: [0, 7, 3, 1, 0, 5, 4] }
+                { type: 'row', blocks: [17] },
+                { type: 'row', blocks: [17] },
+                { type: 'row', blocks: [17] },
+                { type: 'row', blocks: [17] },
+                { type: 'row', blocks: [15] },
+                { type: 'row', blocks: [7] }
             ];
 
             let seatNumber = 1;
@@ -507,13 +507,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 row.style.gridTemplateColumns = `repeat(${rowData.slots.length}, 38px)`;
 
                 rowData.slots.forEach(slot => {
-                    if (slot.type === 'gap' || slot.type === 'empty') {
-                        const spacer = document.createElement('div');
-                        spacer.className = 'seat-spacer';
-                        row.appendChild(spacer);
-                        return;
-                    }
-
                     const seatNum = slot.seatNumber;
                     const seat = document.createElement('div');
                     seat.className = 'seat';

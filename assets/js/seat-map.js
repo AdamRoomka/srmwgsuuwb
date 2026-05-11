@@ -48,12 +48,12 @@ document.addEventListener('app:ready', function () {
     let adminHighlightedUserId = null;
 
     const hallLayout = [
-        { type: 'row', blocks: [4, 2, 3, 2, 3, 2, 7] },
-        { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
-        { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
-        { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 6] },
-        { type: 'row', blocks: [4, 2, 4, 1, 3, 2, 4] },
-        { type: 'row', blocks: [0, 7, 3, 1, 0, 5, 4] }
+        { type: 'row', blocks: [17] },
+        { type: 'row', blocks: [17] },
+        { type: 'row', blocks: [17] },
+        { type: 'row', blocks: [17] },
+        { type: 'row', blocks: [15] },
+        { type: 'row', blocks: [7] }
     ];
 
     function buildHallStructure(totalSeats) {
@@ -129,12 +129,6 @@ document.addEventListener('app:ready', function () {
             row.style.gridTemplateColumns = `repeat(${rowData.slots.length}, 38px)`;
 
             rowData.slots.forEach(slot => {
-                if (slot.type === 'gap' || slot.type === 'empty') {
-                    const spacer = document.createElement('div');
-                    spacer.className = 'seat-spacer';
-                    row.appendChild(spacer);
-                    return;
-                }
 
                 const seatNumber = slot.seatNumber;
                 const seat = document.createElement('div');
@@ -152,7 +146,6 @@ document.addEventListener('app:ready', function () {
                     return parsedSeatNumber === seatNumber;
                 }) || null;
                 const isOccupied = !!occupiedSeat;
-                // console.log(`Rendering seat ${seatNumber}: occupied=${isOccupied}, occupiedSeatUserId=${occupiedSeat ? occupiedSeat.user_id : 'N/A'}, currentUserId=${currentUserId}`);
                 const activeHighlightedUserId = isAdminMode ? highlightedUserId : currentUserId;
                 const isMine = isOccupied && occupiedSeat.user_id !== null && activeHighlightedUserId !== null && parseInt(occupiedSeat.user_id, 10) === activeHighlightedUserId;
                 const isSelected = selectedSource.includes(seatNumber);

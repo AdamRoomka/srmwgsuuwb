@@ -1,7 +1,7 @@
 <div id="reservationModal" class="reservation-modal">
     <div class="reservation-modal-content">
         <div class="reservation-modal-header">
-            <h2 id="modalEventTitle">Wybór miejsc</h2>
+            <h2 id="modalEventTitle">Wybór miejsc w Auli</h2>
             <button type="button" class="modal-close" id="closeReservationModal">&times;</button>
         </div>
 
@@ -10,20 +10,16 @@
             <input type="hidden" name="selected_seats" id="selectedSeatsInput">
 
             <div class="step-container">
-
-                <h2>Wybór miejsc w Auli</h2>
                 <h3>Kliknij na krzesła, aby je zająć</h3>
 
-                <div class="screen-indicator">SCENA</div>
-
+                <div id="seatMap" class="seat-map"></div>
+                
                 <div class="legend">
                     <span class="seat-legend available"></span> Wolne
                     <span class="seat-legend selected"></span> Wybrane
                     <span class="seat-legend occupied"></span> Zajęte
                     <span class="seat-legend mine"></span> Moje miejsca
                 </div>
-
-                <div id="seatMap" class="seat-map"></div>
 
                 <div class="reservation-summary">
                     <p><strong>Wybrane miejsca:</strong> <span id="selectedSeatsList">brak</span></p>
@@ -67,8 +63,6 @@
 
                     <h3>Kliknij miejsca, które chcesz zarezerwować</h3>
 
-                    <div class="screen-indicator">SCENA</div>
-
                     <div class="legend">
                         <span class="seat-legend available"></span> Wolne
                         <span class="seat-legend selected"></span> Wybrane
@@ -107,7 +101,6 @@
             <div class="reservations-content-wrapper">
                 <div class="reservations-seatmap-container">
                     <h3>Plan sali</h3>
-                    <div class="screen-indicator">SCENA</div>
                     <div class="legend">
                         <span class="seat-legend available"></span> Wolne
                         <span class="seat-legend occupied"></span> Zajęte
