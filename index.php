@@ -65,18 +65,28 @@ try {
             e.id AS event_id,
             e.name AS event_name,
             e.start_at,
+            e.duration_minutes,
             GROUP_CONCAT(os.seat_number ORDER BY os.seat_number ASC SEPARATOR ', ') AS seat_numbers
         FROM occupied_seats os
         JOIN events e ON e.id = os.event_id
         WHERE os.user_id = :user_id
           AND os.status = 'AKTYWNA'
-        GROUP BY e.id, e.name, e.start_at
+        GROUP BY e.id, e.name, e.start_at, e.duration_minutes
         ORDER BY e.start_at ASC
     ");
         $userReservationsStmt->execute([
             'user_id' => $currentUser['id']
         ]);
         $userReservations = $userReservationsStmt->fetchAll();
+        
+        // Filtruj rezerwacje - wyświetl tylko te, które się jeszcze nie skończyły
+        $now = new DateTime('now');
+        $userReservations = array_filter($userReservations, function($reservation) use ($now) {
+            $eventEnd = new DateTime($reservation['start_at']);
+            $eventEnd->modify('+' . (int)$reservation['duration_minutes'] . ' minutes');
+            $eventEnd->modify('+10 minutes');
+            return $eventEnd > $now;
+        });
     }
 
 } catch (PDOException $e) {
@@ -245,9 +255,11 @@ foreach ($events as $event) {
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <p>Nie masz jeszcze żadnych rezerwacji przypisanych do Twojego konta.</p>
+                        <p>Nie masz żadnych rezerwacji w następujących wydarzeniach.</p>
                     <?php endif; ?>
 
+                <?php else: ?>
+                    <p>Zaloguj się, aby zobaczyć swoje rezerwacje.</p>
                 <?php endif; ?>
             </div>
         </div>
