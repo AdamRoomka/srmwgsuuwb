@@ -839,3 +839,146 @@ footer p {
 .my-reservations-list .event-card form {
   margin-top: 12px;
 }
+
+
+@media (max-width: 1337px) {
+  .event-card p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1282px) {
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1184px) {
+  .header-container {
+    justify-content: center;
+  }
+
+  .header-user {
+    justify-content: space-around;
+    width: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .container {
+    width: 95%;
+    padding: 10px;
+  }
+
+
+  .events-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .main {
+    width: 65%;
+  }
+
+  .sidebar {
+    width: 35%;
+  }
+}
+
+@media (max-width: 830px) {
+  .events-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .main {
+    width: 50%;
+  }
+
+  .sidebar {
+    width: 50%;
+  }
+}
+
+@media (max-width: 600px) {
+  .view.active {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .main,
+  .sidebar {
+    width: 100%;
+  }
+
+  .sidebar {
+    order: -1;
+    position: static;
+  }
+
+  .my-reservations-list {
+    position: static;
+    grid-template-columns: 1fr;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-card .top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .status-badge {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 425px) {
+  .header-user {
+    flex-direction: column;
+    flex-wrap: wrap;
+  }
+
+  .user-box {
+    display: flex;
+    justify-content: center;
+  }
+
+  .user-box div {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .header-user div {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .logout-link {
+    text-align: center;
+  }
+
+  .login-form-inline {
+    display: flex;
+    flex-direction: column;
+  }
+
+}
