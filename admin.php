@@ -221,7 +221,7 @@ updateLastActivity($pdo, $currentUser);
     <header>
         <div class="header-container">
             <div class="header-left">
-                <a href="/" class="logo-box">
+                <a href="index.php" class="logo-box">
                     <img src="./IMG/uwb_wilno_logo.png" alt="Filia UwB w Wilnie" class="logo" />
                 </a>
                 <h1>Zarządzanie kontami użytkowników</h1>

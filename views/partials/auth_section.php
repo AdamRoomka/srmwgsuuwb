@@ -7,6 +7,10 @@
             </div>
         </div>
         <a class="logout-link" href="?logout=1">Wyloguj</a>
+
+        <?php if ($currentUser['role'] === 'ADMINISTRATOR'): ?>
+            <button onclick="window.location.href='admin.php';" class="btn btn-primary">Panel Admina</button>
+        <?php endif; ?>
     <?php else: ?>
         <div>
             <form method="post" class="login-form-inline">
