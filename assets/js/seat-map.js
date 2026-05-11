@@ -45,6 +45,7 @@ document.addEventListener('app:ready', function () {
     let adminSelectedSeats = [];
     let adminOccupiedSeats = [];
     let adminCurrentTotalSeats = 0;
+    let adminHighlightedUserId = null;
 
     const hallLayout = [
         { type: 'row', blocks: [4, 2, 3, 2, 3, 2, 7] },
@@ -114,7 +115,7 @@ document.addEventListener('app:ready', function () {
         manageSeatsSelectedSeatsInput.value = sorted.join(',');
     }
 
-    function renderSeatGrid(target, structure, occupiedSource, selectedSource, isAdminMode = false) {
+    function renderSeatGrid(target, structure, occupiedSource, selectedSource, isAdminMode = false, highlightedUserId = currentUserId) {
         if (!target) return;
 
         target.innerHTML = '';
@@ -152,7 +153,8 @@ document.addEventListener('app:ready', function () {
                 }) || null;
                 const isOccupied = !!occupiedSeat;
                 // console.log(`Rendering seat ${seatNumber}: occupied=${isOccupied}, occupiedSeatUserId=${occupiedSeat ? occupiedSeat.user_id : 'N/A'}, currentUserId=${currentUserId}`);
-                const isMine = isOccupied && occupiedSeat.user_id !== null && currentUserId !== null && parseInt(occupiedSeat.user_id, 10) === currentUserId;
+                const activeHighlightedUserId = isAdminMode ? highlightedUserId : currentUserId;
+                const isMine = isOccupied && occupiedSeat.user_id !== null && activeHighlightedUserId !== null && parseInt(occupiedSeat.user_id, 10) === activeHighlightedUserId;
                 const isSelected = selectedSource.includes(seatNumber);
 
                 if (occupiedSeat) {
@@ -218,7 +220,8 @@ document.addEventListener('app:ready', function () {
             buildHallStructure(adminCurrentTotalSeats),
             adminOccupiedSeats,
             adminSelectedSeats,
-            true
+            true,
+            adminHighlightedUserId
         );
     }
 
@@ -302,6 +305,7 @@ document.addEventListener('app:ready', function () {
             adminSelectedSeats = [];
             adminCurrentTotalSeats = parseInt(this.dataset.totalSeats || '0', 10);
             adminOccupiedSeats = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
+            adminHighlightedUserId = manageSeatsUserSelect ? parseInt(manageSeatsUserSelect.value || String(currentUserId ?? ''), 10) || null : currentUserId;
 
             if (manageSeatsEventId) manageSeatsEventId.value = this.dataset.eventId || '';
             if (manageSeatsModalTitle) manageSeatsModalTitle.textContent = 'Zarządzanie miejscami: ' + (this.dataset.eventName || '');
@@ -313,6 +317,14 @@ document.addEventListener('app:ready', function () {
             App.openModal(manageSeatsModal);
         });
     });
+
+    if (manageSeatsUserSelect) {
+        manageSeatsUserSelect.addEventListener('change', function () {
+            const parsedUserId = parseInt(this.value || '', 10);
+            adminHighlightedUserId = Number.isFinite(parsedUserId) ? parsedUserId : null;
+            renderAdminSeats();
+        });
+    }
 
     document.addEventListener('click', function (e) {
         const btn = e.target.closest('.open-reservations-list-modal');

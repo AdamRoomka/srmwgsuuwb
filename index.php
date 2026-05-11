@@ -89,6 +89,23 @@ try {
 require_once __DIR__ . '/register.php';
 
 updateLastActivity($pdo, $currentUser);
+
+$todayDate = (new DateTimeImmutable('today'))->format('Y-m-d');
+$eventsToday = [];
+$eventsFuture = [];
+$eventsPast = [];
+
+foreach ($events as $event) {
+    $eventDate = (new DateTimeImmutable($event['start_at']))->format('Y-m-d');
+
+    if ($eventDate === $todayDate) {
+        $eventsToday[] = $event;
+    } elseif ($eventDate > $todayDate) {
+        $eventsFuture[] = $event;
+    } else {
+        $eventsPast[] = $event;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -136,7 +153,6 @@ updateLastActivity($pdo, $currentUser);
         <?php endif; ?>
         <div class="row view active">
             <div class="main">
-                <h2>Wybierz wydarzenie</h2>
                 <?php if ($dbError): ?>
                     <div class="error-box">
                         <h3>Błąd połączenia z bazą danych</h3>
@@ -153,10 +169,29 @@ updateLastActivity($pdo, $currentUser);
                     <?php require __DIR__ . '/views/partials/create_event_modal.php'; ?>
                     <? // modal dodawania wydarzenia (tylko dla administratora) ?>
 
-                    <div class="events-grid">
-                        <?php require __DIR__ . '/views/partials/event_card.php'; ?>
-                        <? // karty wydarzeń z przyciskiem rezerwacji (tylko dla zalogowanych użytkowników) ?>
-                    </div>
+                    <?php if (!empty($eventsToday)): ?>
+                        <h2>Wydarzenia na dziś</h2>
+                        <div class="events-grid">
+                            <?php $events = $eventsToday; ?>
+                            <?php require __DIR__ . '/views/partials/event_card.php'; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($eventsFuture)): ?>
+                        <h2>Nadchodzące wydarzenia</h2>
+                        <div class="events-grid">
+                            <?php $events = $eventsFuture; ?>
+                            <?php require __DIR__ . '/views/partials/event_card.php'; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($eventsPast)): ?>
+                        <h2>Minione wydarzenia</h2>
+                        <div class="events-grid">
+                            <?php $events = $eventsPast; ?>
+                            <?php require __DIR__ . '/views/partials/event_card.php'; ?>
+                        </div>
+                    <?php endif; ?>
 
                     <?php require __DIR__ . '/views/partials/reservation_modal.php'; ?>
                     <? // modal rezerwacji miejsc (tylko dla zalogowanych użytkowników) ?>
