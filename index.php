@@ -78,12 +78,12 @@ try {
             'user_id' => $currentUser['id']
         ]);
         $userReservations = $userReservationsStmt->fetchAll();
-        
+
         // Filtruj rezerwacje - wyświetl tylko te, które się jeszcze nie skończyły
         $now = new DateTime('now');
-        $userReservations = array_filter($userReservations, function($reservation) use ($now) {
+        $userReservations = array_filter($userReservations, function ($reservation) use ($now) {
             $eventEnd = new DateTime($reservation['start_at']);
-            $eventEnd->modify('+' . (int)$reservation['duration_minutes'] . ' minutes');
+            $eventEnd->modify('+' . (int) $reservation['duration_minutes'] . ' minutes');
             $eventEnd->modify('+10 minutes');
             return $eventEnd > $now;
         });
@@ -154,7 +154,7 @@ foreach ($events as $event) {
 
     <div class="container">
         <?php if ($currentUser && $currentUser['role'] === 'ADMINISTRATOR'): ?>
-            <div style="position: fixed; bottom: 20px; right: 20px;">
+            <div style="position: fixed; bottom: 20px; right: 20px; z-index:2;">
                 <button type="button" class="btn btn-primary"
                     style="border-radius: 40px; font-size: 20px; padding: 13px 18px;" id="openCreateEventModal">
                     <i class="fa-solid fa-plus"></i>
