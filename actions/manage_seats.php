@@ -32,7 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
         exit;
     }
 
-    $eventStmt = $pdo->prepare("\n        SELECT id, total_seats, status\n        FROM events\n        WHERE id = :id\n        LIMIT 1\n    ");
+    $eventStmt = $pdo->prepare("
+        SELECT id, total_seats, status
+        FROM events
+        WHERE id = :id
+        LIMIT 1
+    ");
     $eventStmt->execute(['id' => $eventId]);
     $eventRow = $eventStmt->fetch();
 
@@ -65,7 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
     }
 
     if ($seatAction === 'reserve') {
-        $userStmt = $pdo->prepare("\n            SELECT id\n            FROM users\n            WHERE id = :id\n            LIMIT 1\n        ");
+        $userStmt = $pdo->prepare("
+            SELECT id
+            FROM users
+            WHERE id = :id
+            LIMIT 1
+        ");
         $userStmt->execute(['id' => $selectedUserId]);
         $userExists = $userStmt->fetch();
 
@@ -103,22 +113,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
                       AND seat_number IN ($deletePlaceholders)
                 ");
                 $deleteSeatsStmt->execute(array_merge([$eventId, $selectedUserId], $existingSeats));
-
-                $deleteReservationStmt = $pdo->prepare("
-                    DELETE FROM reservations
-                    WHERE event_id = :event_id
-                      AND user_id = :user_id
-                      AND status = 'AKTYWNA'
-                ");
-                $deleteReservationStmt->execute([
-                    'event_id' => $eventId,
-                    'user_id' => $selectedUserId,
-                ]);
             }
 
             $placeholders = implode(',', array_fill(0, count($selectedSeatsArray), '?'));
 
-            $checkStmt = $pdo->prepare("\n                SELECT seat_number\n                FROM occupied_seats\n                WHERE event_id = ?\n                  AND status = 'AKTYWNA'\n                  AND seat_number IN ($placeholders)\n            ");
+            $checkStmt = $pdo->prepare("
+                SELECT seat_number
+                FROM occupied_seats
+                WHERE event_id = ?
+                  AND status = 'AKTYWNA'
+                  AND seat_number IN ($placeholders)
+            ");
             $checkStmt->execute(array_merge([$eventId], $selectedSeatsArray));
             $takenSeats = $checkStmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -129,14 +134,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
                 exit;
             }
 
-            $reservationStmt = $pdo->prepare("\n                INSERT INTO reservations (user_id, event_id, reserved_seats, status)\n                VALUES (:user_id, :event_id, :reserved_seats, 'AKTYWNA')\n            ");
-            $reservationStmt->execute([
-                'user_id' => $selectedUserId,
-                'event_id' => $eventId,
-                'reserved_seats' => count($selectedSeatsArray),
-            ]);
-
-            $seatInsertStmt = $pdo->prepare("\n                INSERT INTO occupied_seats (event_id, seat_number, user_id, status)\n                VALUES (:event_id, :seat_number, :user_id, 'AKTYWNA')\n            ");
+            $seatInsertStmt = $pdo->prepare("
+                INSERT INTO occupied_seats (event_id, seat_number, user_id, status)
+                VALUES (:event_id, :seat_number, :user_id, 'AKTYWNA')
+            ");
 
             foreach ($selectedSeatsArray as $seatNumber) {
                 $seatInsertStmt->execute([
@@ -152,7 +153,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
         if ($seatAction === 'release') {
             $placeholders = implode(',', array_fill(0, count($selectedSeatsArray), '?'));
 
-            $checkStmt = $pdo->prepare("\n                SELECT id, seat_number\n                FROM occupied_seats\n                WHERE event_id = ?\n                  AND status = 'AKTYWNA'\n                  AND seat_number IN ($placeholders)\n            ");
+            $checkStmt = $pdo->prepare("
+                SELECT id, seat_number
+                FROM occupied_seats
+                WHERE event_id = ?
+                  AND status = 'AKTYWNA'
+                  AND seat_number IN ($placeholders)
+            ");
             $checkStmt->execute(array_merge([$eventId], $selectedSeatsArray));
             $occupiedRows = $checkStmt->fetchAll();
 
@@ -163,7 +170,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
 
                 $occupiedPlaceholders = implode(',', array_fill(0, count($occupiedSeatNumbers), '?'));
 
-                $deleteSeatsStmt = $pdo->prepare("\n                    DELETE FROM occupied_seats\n                    WHERE event_id = ?\n                      AND seat_number IN ($occupiedPlaceholders)\n                ");
+                $deleteSeatsStmt = $pdo->prepare("
+                    DELETE FROM occupied_seats
+                    WHERE event_id = ?
+                      AND seat_number IN ($occupiedPlaceholders)
+                ");
                 $deleteSeatsStmt->execute(array_merge([$eventId], $occupiedSeatNumbers));
 
                 $countByUser = [];
@@ -171,10 +182,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
                     $userId = (int) $row['user_id'];
                     $countByUser[$userId] = ($countByUser[$userId] ?? 0) + 1;
                 }
-
-                $updateReservationsStmt = $pdo->prepare("\n                    UPDATE reservations\n                    SET reserved_seats = reserved_seats - :seat_count\n                    WHERE event_id = :event_id\n                      AND user_id = :user_id\n                      AND status = 'AKTYWNA'\n                      AND reserved_seats > 0\n                ");
-
-                $deleteEmptyReservationsStmt = $pdo->prepare("\n                    DELETE FROM reservations\n                    WHERE event_id = :event_id\n                      AND user_id = :user_id\n                      AND status = 'AKTYWNA'\n                      AND reserved_seats <= 0\n                ");
 
                 foreach ($countByUser as $userId => $seatCount) {
                     $updateReservationsStmt->execute([
