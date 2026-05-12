@@ -15,10 +15,11 @@
                 <div id="seatMap" class="seat-map"></div>
                 
                 <div class="legend">
-                    <span class="seat-legend available"></span> Wolne
-                    <span class="seat-legend selected"></span> Wybrane
-                    <span class="seat-legend occupied"></span> Zajęte
                     <span class="seat-legend mine"></span> Moje miejsca
+                    <span class="seat-legend canceled"></span> Anulowanie
+                    <span class="seat-legend selected"></span> Wybrane
+                    <span class="seat-legend available"></span> Wolne
+                    <span class="seat-legend occupied"></span> Zajęte
                 </div>
 
                 <div class="reservation-summary">
@@ -63,14 +64,15 @@
 
                     <h3>Kliknij miejsca, które chcesz zarezerwować</h3>
 
+                    <div id="manageSeatMap" class="seat-map"></div>
+
                     <div class="legend">
+                        <span class="seat-legend mine"></span> Moje miejsca
+                        <span class="seat-legend canceled"></span> Anulowanie
                         <span class="seat-legend available"></span> Wolne
                         <span class="seat-legend selected"></span> Wybrane
                         <span class="seat-legend occupied"></span> Zajęte
-                        <span class="seat-legend mine"></span> Moje miejsca
                     </div>
-
-                    <div id="manageSeatMap" class="seat-map"></div>
 
                     <div class="reservation-summary">
                         <p><strong>Wybrane miejsca:</strong> <span id="manageSelectedSeatsList">brak</span></p>
@@ -79,9 +81,9 @@
 
                     <div class="action-buttons">
                         <button type="button" class="btn btn-secondary" id="cancelManageSeatsBtn">Anuluj</button>
-                        <button type="submit" class="btn btn-primary" id="reserveManagedSeatsBtn">Zarezerwuj wybrane
+                        <button type="submit" class="btn btn-primary" id="reserveManagedSeatsBtn">Modyfikuj wybrane
                             miejsca</button>
-                        <button type="button" class="btn btn-secondary" id="releaseManagedSeatsBtn">Usuń rezerwację
+                        <button type="button" class="btn btn-secondary" id="releaseManagedSeatsBtn">Usuń rezerwacje
                             miejsc</button>
                     </div>
                 </div>
@@ -101,12 +103,13 @@
             <div class="reservations-content-wrapper">
                 <div class="reservations-seatmap-container">
                     <h3>Plan sali</h3>
+                    <div id="reservationsViewSeatMap" class="seat-map"></div>
+
                     <div class="legend">
                         <span class="seat-legend available"></span> Wolne
                         <span class="seat-legend occupied"></span> Zajęte
                         <span class="seat-legend highlighted"></span> Wybrana rezerwacja
                     </div>
-                    <div id="reservationsViewSeatMap" class="seat-map"></div>
                 </div>
 
                 <div class="reservations-list-container">

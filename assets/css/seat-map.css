@@ -74,6 +74,10 @@
     background: #4caf50;
 }
 
+.seat-legend.canceled {
+    background: #c0392b;
+}
+
 .seat:hover:not(.occupied),
 .seat-legend.selected,
 .seat.selected {
@@ -92,7 +96,14 @@
 
 .seat.mine,
 .seat-legend.mine,
-.seat.occupied.mine,
+.seat.occupied.mine {
+    background: #2563eb;
+    border-color: #1d4ed8;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* Moje zarezerwowane miejsca zaznaczone do utrzymania - bez zmian */
 .seat.occupied.mine.selected {
     background: #2563eb;
     border-color: #1d4ed8;
@@ -100,14 +111,30 @@
     cursor: pointer;
 }
 
-.seat.legend {
-    cursor: default;
-}
-
-.seat.selected-for-release {
+/* Moje zarezerwowane miejsca NIE zaznaczone - do anulowania */
+.seat.occupied.mine:not(.selected) {
     background: #c0392b;
     border-color: #922b21;
     color: #fff;
+    cursor: pointer;
+}
+
+.seat.adding {
+    background: #f4c542;
+    border-color: #c89b17;
+    color: #111;
+    cursor: pointer;
+}
+
+.seat.occupied.selected:not(.mine) {
+    background: #c0392b;
+    border-color: #922b21;
+    color: #fff;
+    cursor: pointer;
+}
+
+.seat.legend {
+    cursor: default;
 }
 
 .legend {

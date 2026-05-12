@@ -12,13 +12,13 @@
             <button onclick="window.location.href='admin.php';" class="btn btn-primary">Panel Administratora</button>
         <?php endif; ?>
     <?php else: ?>
-        <div>
+        <div class="auth-actions">
             <form method="post" class="login-form-inline">
                 <input type="email" name="login_email" placeholder="Email" required>
                 <input type="password" name="login_password" placeholder="Hasło" required>
                 <button type="submit" class="btn btn-primary">Zaloguj</button>
             </form>
-            <button class="btn btn-primary" href="#" class="btn"
+            <button type="button" class="btn btn-primary"
                 onclick="document.getElementById('registerModal').style.display='block'; return false;">
                 Zarejestruj się
             </button>

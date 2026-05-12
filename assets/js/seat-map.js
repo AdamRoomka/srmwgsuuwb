@@ -24,6 +24,7 @@ document.addEventListener('app:ready', function () {
     const reserveEventId = document.getElementById('reserveEventId');
 
     const manageSeatsEventId = document.getElementById('manageSeatsEventId');
+    const manageSeatsUserSelect = document.getElementById('manageSeatsUserSelect');
     const manageSeatsSelectedSeatsInput = document.getElementById('manageSeatsSelectedSeatsInput');
     const manageSelectedSeatsList = document.getElementById('manageSelectedSeatsList');
     const manageSelectedSeatsCount = document.getElementById('manageSelectedSeatsCount');
@@ -41,8 +42,11 @@ document.addEventListener('app:ready', function () {
     let selectedSeats = [];
     let occupiedSeats = [];
     let currentTotalSeats = 0;
+    let originalOwnSeats = []; // Track original user seats to show changes
 
     let adminSelectedSeats = [];
+    let adminOriginalSeats = [];
+    let adminReleaseSeats = [];
     let adminOccupiedSeats = [];
     let adminCurrentTotalSeats = 0;
     let adminHighlightedUserId = null;
@@ -137,12 +141,8 @@ document.addEventListener('app:ready', function () {
                 seat.textContent = seatNumber;
 
                 const occupiedSeat = occupiedSource.find(item => {
-                    console.log('item.seat_number przed parseInt:', item.seat_number);
 
                     const parsedSeatNumber = parseInt(item.seat_number, 10);
-                    console.log('item.seat_number po parseInt:', parsedSeatNumber);
-                    console.log('seatNumber do porównania:', seatNumber);
-                    console.log(' ');
                     return parsedSeatNumber === seatNumber;
                 }) || null;
                 const isOccupied = !!occupiedSeat;
@@ -164,7 +164,16 @@ document.addEventListener('app:ready', function () {
                 if (isOccupied) seat.classList.add('occupied');
                 if (isMine) seat.classList.add('mine');
                 if (isSelected) seat.classList.add('selected');
-                if (isAdminMode && isOccupied && isSelected) seat.classList.add('selected-for-release');
+                
+                // Mark new free seats selected for addition
+                if (!isAdminMode && !isOccupied && isSelected) {
+                    seat.classList.add('adding');
+                }
+                
+                // Mark new free seats selected for addition in admin mode
+                if (isAdminMode && !isOccupied && isSelected) {
+                    seat.classList.add('adding');
+                }
 
                 seat.addEventListener('click', function () {
                     if (!isAdminMode && isOccupied && !isMine) return;
@@ -219,7 +228,6 @@ document.addEventListener('app:ready', function () {
     }
 
     function renderReservationsList(occupiedSeatsData, totalSeatsFromButton = 0) {
-        console.log('reservationsList element:', reservationsList);
 
         if (!reservationsList) {
             console.error('reservationsList element is null!');
@@ -285,6 +293,7 @@ document.addEventListener('app:ready', function () {
             currentTotalSeats = parseInt(this.dataset.totalSeats || '0', 10);
             occupiedSeats = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
             selectedSeats = getOwnOccupiedSeatsForEvent(occupiedSeats, currentUserId);
+            originalOwnSeats = getOwnOccupiedSeatsForEvent(occupiedSeats, currentUserId);
 
             if (reserveEventId) reserveEventId.value = this.dataset.eventId || '';
             updateSelectedSeatsInfo();
@@ -295,10 +304,12 @@ document.addEventListener('app:ready', function () {
 
     document.querySelectorAll('.open-manage-seats-modal').forEach(button => {
         button.addEventListener('click', function () {
-            adminSelectedSeats = [];
             adminCurrentTotalSeats = parseInt(this.dataset.totalSeats || '0', 10);
             adminOccupiedSeats = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
             adminHighlightedUserId = manageSeatsUserSelect ? parseInt(manageSeatsUserSelect.value || String(currentUserId ?? ''), 10) || null : currentUserId;
+            adminOriginalSeats = getOwnOccupiedSeatsForEvent(adminOccupiedSeats, adminHighlightedUserId);
+            adminSelectedSeats = [...adminOriginalSeats];
+            adminReleaseSeats = [];
 
             if (manageSeatsEventId) manageSeatsEventId.value = this.dataset.eventId || '';
             if (manageSeatsModalTitle) manageSeatsModalTitle.textContent = 'Zarządzanie miejscami: ' + (this.dataset.eventName || '');
@@ -315,6 +326,10 @@ document.addEventListener('app:ready', function () {
         manageSeatsUserSelect.addEventListener('change', function () {
             const parsedUserId = parseInt(this.value || '', 10);
             adminHighlightedUserId = Number.isFinite(parsedUserId) ? parsedUserId : null;
+            adminOriginalSeats = getOwnOccupiedSeatsForEvent(adminOccupiedSeats, adminHighlightedUserId);
+            adminSelectedSeats = [...adminOriginalSeats];
+            adminReleaseSeats = [];
+            updateAdminSelectedSeatsInfo();
             renderAdminSeats();
         });
     }
@@ -416,9 +431,25 @@ document.addEventListener('app:ready', function () {
 
     if (releaseManagedSeatsBtn) {
         releaseManagedSeatsBtn.addEventListener('click', function () {
-            if (!adminSelectedSeats.length) {
+            console.log('Admin original seats:', adminOriginalSeats);
+            console.log('Admin selected seats:', adminSelectedSeats);
+            const originalSet = new Set(adminOriginalSeats);
+            const selectedSet = new Set(adminSelectedSeats);
+
+            adminReleaseSeats = [
+                ...adminOriginalSeats.filter(seatNumber => !selectedSet.has(seatNumber)),
+                ...adminSelectedSeats.filter(seatNumber => !originalSet.has(seatNumber))
+            ];
+
+            adminReleaseSeats = [...new Set(adminReleaseSeats)];
+
+            if (!adminReleaseSeats.length) {
                 alert('Wybierz miejsca do zwolnienia.');
                 return;
+            }
+
+            if (manageSeatsSelectedSeatsInput) {
+                manageSeatsSelectedSeatsInput.value = adminReleaseSeats.sort((a, b) => a - b).join(',');
             }
 
             if (manageSeatsActionInput) {

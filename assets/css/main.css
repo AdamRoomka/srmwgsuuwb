@@ -384,6 +384,13 @@ footer p {
   gap: 10px;
 }
 
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
 .top-auth {
   display: flex;
   align-items: center;
@@ -395,7 +402,7 @@ footer p {
   display: flex;
   gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
 }
 
@@ -942,22 +949,21 @@ footer p {
     flex-wrap: wrap;
   }
 
+  .auth-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
   .user-box {
     display: flex;
     justify-content: center;
   }
 
-  .user-box div {
+  .user-box > div {
     display: flex;
     gap: 20px;
     align-items: center;
-  }
-
-  .header-user div {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    gap: 10px;
   }
 
   .logout-link {
@@ -967,6 +973,7 @@ footer p {
   .login-form-inline {
     display: flex;
     flex-direction: column;
+    width: 100%;
   }
 
 }

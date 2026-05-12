@@ -66,12 +66,13 @@ try {
             e.name AS event_name,
             e.start_at,
             e.duration_minutes,
+            e.status,
             GROUP_CONCAT(os.seat_number ORDER BY os.seat_number ASC SEPARATOR ', ') AS seat_numbers
         FROM occupied_seats os
         JOIN events e ON e.id = os.event_id
         WHERE os.user_id = :user_id
           AND os.status = 'AKTYWNA'
-        GROUP BY e.id, e.name, e.start_at, e.duration_minutes
+        GROUP BY e.id, e.name, e.start_at, e.duration_minutes, e.status
         ORDER BY e.start_at ASC
     ");
         $userReservationsStmt->execute([
@@ -230,7 +231,7 @@ foreach ($events as $event) {
                                             </div>
                                         </div>
                                         <div class="status-badge success">
-                                            <?php echo htmlspecialchars(statusLabel($event['status'])); ?>
+                                            <?php echo htmlspecialchars(statusLabel($reservation['status'])); ?>
                                         </div>
                                     </div>
 
