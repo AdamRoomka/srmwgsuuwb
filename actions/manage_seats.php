@@ -80,6 +80,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
         $pdo->beginTransaction();
 
         if ($seatAction === 'reserve') {
+            $existingStmt = $pdo->prepare("
+                SELECT seat_number
+                FROM occupied_seats
+                WHERE event_id = :event_id
+                  AND user_id = :user_id
+                  AND status = 'AKTYWNA'
+            ");
+            $existingStmt->execute([
+                'event_id' => $eventId,
+                'user_id' => $selectedUserId,
+            ]);
+            $existingSeats = array_map('intval', $existingStmt->fetchAll(PDO::FETCH_COLUMN));
+
+            if (!empty($existingSeats)) {
+                $deletePlaceholders = implode(',', array_fill(0, count($existingSeats), '?'));
+
+                $deleteSeatsStmt = $pdo->prepare("
+                    DELETE FROM occupied_seats
+                    WHERE event_id = ?
+                      AND user_id = ?
+                      AND seat_number IN ($deletePlaceholders)
+                ");
+                $deleteSeatsStmt->execute(array_merge([$eventId, $selectedUserId], $existingSeats));
+
+                $deleteReservationStmt = $pdo->prepare("
+                    DELETE FROM reservations
+                    WHERE event_id = :event_id
+                      AND user_id = :user_id
+                      AND status = 'AKTYWNA'
+                ");
+                $deleteReservationStmt->execute([
+                    'event_id' => $eventId,
+                    'user_id' => $selectedUserId,
+                ]);
+            }
+
             $placeholders = implode(',', array_fill(0, count($selectedSeatsArray), '?'));
 
             $checkStmt = $pdo->prepare("\n                SELECT seat_number\n                FROM occupied_seats\n                WHERE event_id = ?\n                  AND status = 'AKTYWNA'\n                  AND seat_number IN ($placeholders)\n            ");
@@ -120,25 +156,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
             $checkStmt->execute(array_merge([$eventId], $selectedSeatsArray));
             $occupiedRows = $checkStmt->fetchAll();
 
-            if (count($occupiedRows) !== count($selectedSeatsArray)) {
-                $pdo->rollBack();
-                $_SESSION['reservationError'] = 'Niektóre wybrane miejsca nie są obecnie zarezerwowane.';
-                header('Location: index.php');
-                exit;
+            if (!empty($occupiedRows)) {
+                $occupiedSeatNumbers = array_map(static function ($row) {
+                    return (int) $row['seat_number'];
+                }, $occupiedRows);
+
+                $occupiedPlaceholders = implode(',', array_fill(0, count($occupiedSeatNumbers), '?'));
+
+                $deleteSeatsStmt = $pdo->prepare("\n                    DELETE FROM occupied_seats\n                    WHERE event_id = ?\n                      AND seat_number IN ($occupiedPlaceholders)\n                ");
+                $deleteSeatsStmt->execute(array_merge([$eventId], $occupiedSeatNumbers));
+
+                $countByUser = [];
+                foreach ($occupiedRows as $row) {
+                    $userId = (int) $row['user_id'];
+                    $countByUser[$userId] = ($countByUser[$userId] ?? 0) + 1;
+                }
+
+                $updateReservationsStmt = $pdo->prepare("\n                    UPDATE reservations\n                    SET reserved_seats = reserved_seats - :seat_count\n                    WHERE event_id = :event_id\n                      AND user_id = :user_id\n                      AND status = 'AKTYWNA'\n                      AND reserved_seats > 0\n                ");
+
+                $deleteEmptyReservationsStmt = $pdo->prepare("\n                    DELETE FROM reservations\n                    WHERE event_id = :event_id\n                      AND user_id = :user_id\n                      AND status = 'AKTYWNA'\n                      AND reserved_seats <= 0\n                ");
+
+                foreach ($countByUser as $userId => $seatCount) {
+                    $updateReservationsStmt->execute([
+                        'event_id' => $eventId,
+                        'user_id' => $userId,
+                        'seat_count' => $seatCount,
+                    ]);
+
+                    $deleteEmptyReservationsStmt->execute([
+                        'event_id' => $eventId,
+                        'user_id' => $userId,
+                    ]);
+                }
+
+                $_SESSION['reservationMessage'] = 'Wybrane zajęte miejsca zostały zwolnione.';
+            } else {
+                $_SESSION['reservationMessage'] = 'Żadne z wybranych miejsc nie było zajęte.';
             }
-
-            $deleteSeatsStmt = $pdo->prepare("\n                DELETE FROM occupied_seats\n                WHERE event_id = ?\n                  AND seat_number IN ($placeholders)\n            ");
-            $deleteSeatsStmt->execute(array_merge([$eventId], $selectedSeatsArray));
-
-            $updateReservationsStmt = $pdo->prepare("\n                UPDATE reservations\n                SET reserved_seats = reserved_seats - 1\n                WHERE event_id = :event_id\n                  AND status = 'AKTYWNA'\n                  AND reserved_seats > 0\n            ");
-            foreach ($selectedSeatsArray as $seatNumber) {
-                $updateReservationsStmt->execute(['event_id' => $eventId]);
-            }
-
-            $deleteEmptyReservationsStmt = $pdo->prepare("\n                DELETE FROM reservations\n                WHERE event_id = :event_id\n                  AND status = 'AKTYWNA'\n                  AND reserved_seats <= 0\n            ");
-            $deleteEmptyReservationsStmt->execute(['event_id' => $eventId]);
-
-            $_SESSION['reservationMessage'] = 'Wybrane miejsca zostały zwolnione.';
         }
 
         $pdo->commit();
