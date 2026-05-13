@@ -94,7 +94,7 @@ views/
 1. Skopiuj projekt do folderu `C:\xampp\htdocs\...`
 2. Uruchom `Apache` i `MySQL` w XAMPP
 3. W phpMyAdmin utwórz bazę danych `uwb_rezerwacje`
-4. Zaimportuj plik `.sql`, jeśli jest dostępny
+4. Zaimportuj plik `.sql`
 5. Otwórz aplikację w przeglądarce z poziomu localhost
 
 ## Dane testowe

@@ -32,8 +32,8 @@
             </div>
         </div>
 
-        <h3><?php echo htmlspecialchars($event['name']); ?></h3>
-        <p class="description"><?php echo htmlspecialchars($event['description']); ?></p>
+        <h3 title="<?php echo htmlspecialchars($event['name']); ?>"><?php echo htmlspecialchars($event['name']); ?></h3>
+        <p class="description" title="<?php echo htmlspecialchars($event['description']); ?>"><?php echo htmlspecialchars($event['description']); ?></p>
         <p><i class="fa-regular fa-calendar"></i> <strong>Data:</strong>
             <?php echo htmlspecialchars(formatDatePl($event['start_at'])); ?></p>
         <p><i class="fa-regular fa-clock"></i> <strong>Czas trwania:</strong>

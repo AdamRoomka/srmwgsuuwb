@@ -94,16 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reserve_event_id'], $
                     }
 
                     if (!empty($selectedSeatsArray)) {
-                        $reservationStmt = $pdo->prepare("
-                            INSERT INTO reservations (user_id, event_id, reserved_seats, status)
-                            VALUES (:user_id, :event_id, :reserved_seats, 'AKTYWNA')
-                        ");
-                        $reservationStmt->execute([
-                            'user_id' => $currentUser['id'],
-                            'event_id' => $eventId,
-                            'reserved_seats' => count($selectedSeatsArray),
-                        ]);
-
                         $seatInsertStmt = $pdo->prepare("
                             INSERT INTO occupied_seats (event_id, seat_number, user_id, status)
                             VALUES (:event_id, :seat_number, :user_id, 'AKTYWNA')
