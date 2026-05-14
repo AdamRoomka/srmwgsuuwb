@@ -530,6 +530,13 @@ footer p {
   font-weight: 600;
 }
 
+.public-preview-login-note {
+  margin: 12px 0 0;
+  text-align: center;
+  color: #4b1d6b;
+  font-weight: 600;
+}
+
 @media (max-width: 900px) {
   .top-auth {
     width: 100%;

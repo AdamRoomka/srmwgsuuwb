@@ -61,7 +61,13 @@
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
             <?php elseif (!$currentUser && $event['status'] === 'PLANOWANE' && $availableSeats > 0): ?>
-                <p class="reserve-note">Zaloguj się, aby zarezerwować miejsca.</p>
+                <button class="btn btn-reserve open-public-reservation-preview"
+                    data-event-name="<?php echo htmlspecialchars($event['name']); ?>"
+                    data-total-seats="<?php echo (int) $event['total_seats']; ?>"
+                    data-occupied-seats='<?php echo htmlspecialchars(json_encode($eventOccupiedSeats), ENT_QUOTES, 'UTF-8'); ?>'>
+                    Przeglądaj rezerwacje
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
             <?php elseif ($availableSeats <= 0 && $event['status'] === 'PLANOWANE'): ?>
                 <p class="blocked-msg">Wszystkie miejsca zajęte</p>
             <?php else: ?>
