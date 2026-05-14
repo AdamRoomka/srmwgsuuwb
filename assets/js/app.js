@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
             editEventTotalSeats.value = this.dataset.eventTotalSeats || '';
             editEventStatus.value = this.dataset.eventStatus || 'PLANOWANE';
 
+            document.querySelector(".container").style.overflow = 'hidden';
             App.openModal(editEventModal);
         });
     });
@@ -123,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (closeEditEventModal && editEventModal) {
         closeEditEventModal.addEventListener('click', function () {
             clearValidationState(editEventModal);
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(editEventModal);
         });
     }
@@ -130,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (cancelEditEventBtn && editEventModal) {
         cancelEditEventBtn.addEventListener('click', function () {
             clearValidationState(editEventModal);
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(editEventModal);
         });
     }
@@ -150,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (editEventModal) {
         editEventBtn.addEventListener('click', function (e) {
             if (e.target === editEventModal) {
+                document.querySelector(".container").style.overflow = '';
                 App.closeModal(editEventModal);
             }
         });
@@ -166,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (openCreateEventModal && createEventModal) {
         openCreateEventModal.addEventListener('click', function () {
             clearValidationState(createEventModal);
+            document.querySelector(".container").style.overflow = 'hidden';
             App.openModal(createEventModal);
         });
     }
@@ -173,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (closeCreateEventModal && createEventModal) {
         closeCreateEventModal.addEventListener('click', function () {
             clearValidationState(createEventModal);
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(createEventModal);
         });
     }
@@ -180,6 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (cancelCreateEventBtn && createEventModal) {
         cancelCreateEventBtn.addEventListener('click', function () {
             clearValidationState(createEventModal);
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(createEventModal);
         });
     }
