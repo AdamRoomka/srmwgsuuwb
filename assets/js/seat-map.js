@@ -2,6 +2,7 @@ window.App = window.App || {};
 
 document.addEventListener('app:ready', function () {
     const reservationButtons = document.querySelectorAll('.open-reservation-modal');
+    const publicReservationPreviewButtons = document.querySelectorAll('.open-public-reservation-preview');
     const manageButtons = document.querySelectorAll('.open-manage-seats-modal');
     const reservationsListButtons = document.querySelectorAll('.open-reservations-list-modal');
 
@@ -13,6 +14,12 @@ document.addEventListener('app:ready', function () {
     const reservationModal = document.getElementById('reservationModal');
     const closeReservationModal = document.getElementById('closeReservationModal');
     const cancelReservationBtn = document.getElementById('cancelReservationBtn');
+
+    const publicReservationPreviewModal = document.getElementById('publicReservationPreviewModal');
+    const publicReservationPreviewTitle = document.getElementById('publicReservationPreviewTitle');
+    const publicReservationPreviewSeatMap = document.getElementById('publicReservationPreviewSeatMap');
+    const closePublicReservationPreviewModal = document.getElementById('closePublicReservationPreviewModal');
+    const closePublicReservationPreviewBtn = document.getElementById('closePublicReservationPreviewBtn');
 
     const manageSeatsModal = document.getElementById('manageSeatsModal');
     const closeManageSeatsModal = document.getElementById('closeManageSeatsModal');
@@ -119,9 +126,10 @@ document.addEventListener('app:ready', function () {
         manageSeatsSelectedSeatsInput.value = sorted.join(',');
     }
 
-    function renderSeatGrid(target, structure, occupiedSource, selectedSource, isAdminMode = false, highlightedUserId = currentUserId) {
+    function renderSeatGrid(target, structure, occupiedSource, selectedSource, isAdminMode = false, highlightedUserId = currentUserId, allowSelection = true) {
         if (!target) return;
 
+        target.classList.toggle('readonly-seat-map', !allowSelection);
         target.innerHTML = '';
 
         const hallBody = document.createElement('div');
@@ -175,27 +183,29 @@ document.addEventListener('app:ready', function () {
                     seat.classList.add('adding');
                 }
 
-                seat.addEventListener('click', function () {
-                    if (!isAdminMode && isOccupied && !isMine) return;
+                if (allowSelection) {
+                    seat.addEventListener('click', function () {
+                        if (!isAdminMode && isOccupied && !isMine) return;
 
-                    if (isAdminMode) {
-                        if (adminSelectedSeats.includes(seatNumber)) {
-                            adminSelectedSeats = adminSelectedSeats.filter(num => num !== seatNumber);
+                        if (isAdminMode) {
+                            if (adminSelectedSeats.includes(seatNumber)) {
+                                adminSelectedSeats = adminSelectedSeats.filter(num => num !== seatNumber);
+                            } else {
+                                adminSelectedSeats.push(seatNumber);
+                            }
+                            updateAdminSelectedSeatsInfo();
+                            renderAdminSeats();
                         } else {
-                            adminSelectedSeats.push(seatNumber);
+                            if (selectedSeats.includes(seatNumber)) {
+                                selectedSeats = selectedSeats.filter(num => num !== seatNumber);
+                            } else {
+                                selectedSeats.push(seatNumber);
+                            }
+                            updateSelectedSeatsInfo();
+                            renderSeats();
                         }
-                        updateAdminSelectedSeatsInfo();
-                        renderAdminSeats();
-                    } else {
-                        if (selectedSeats.includes(seatNumber)) {
-                            selectedSeats = selectedSeats.filter(num => num !== seatNumber);
-                        } else {
-                            selectedSeats.push(seatNumber);
-                        }
-                        updateSelectedSeatsInfo();
-                        renderSeats();
-                    }
-                });
+                    });
+                }
 
                 row.appendChild(seat);
             });
@@ -302,6 +312,30 @@ document.addEventListener('app:ready', function () {
         });
     });
 
+    publicReservationPreviewButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const totalSeats = parseInt(this.dataset.totalSeats || '0', 10);
+            const previewOccupiedSeats = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
+            const eventName = this.dataset.eventName || '';
+
+            if (publicReservationPreviewTitle) {
+                publicReservationPreviewTitle.textContent = 'Podgląd sali: ' + eventName;
+            }
+
+            renderSeatGrid(
+                publicReservationPreviewSeatMap,
+                buildHallStructure(totalSeats),
+                previewOccupiedSeats,
+                [],
+                false,
+                currentUserId,
+                false
+            );
+
+            App.openModal(publicReservationPreviewModal);
+        });
+    });
+
     document.querySelectorAll('.open-manage-seats-modal').forEach(button => {
         button.addEventListener('click', function () {
             adminCurrentTotalSeats = parseInt(this.dataset.totalSeats || '0', 10);
@@ -397,6 +431,26 @@ document.addEventListener('app:ready', function () {
         reservationModal.addEventListener('click', function (e) {
             if (e.target === reservationModal) {
                 App.closeModal(reservationModal);
+            }
+        });
+    }
+
+    if (closePublicReservationPreviewModal && publicReservationPreviewModal) {
+        closePublicReservationPreviewModal.addEventListener('click', function () {
+            App.closeModal(publicReservationPreviewModal);
+        });
+    }
+
+    if (closePublicReservationPreviewBtn && publicReservationPreviewModal) {
+        closePublicReservationPreviewBtn.addEventListener('click', function () {
+            App.closeModal(publicReservationPreviewModal);
+        });
+    }
+
+    if (publicReservationPreviewModal) {
+        publicReservationPreviewModal.addEventListener('click', function (e) {
+            if (e.target === publicReservationPreviewModal) {
+                App.closeModal(publicReservationPreviewModal);
             }
         });
     }

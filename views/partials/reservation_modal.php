@@ -36,6 +36,32 @@
     </div>
 </div>
 
+<div id="publicReservationPreviewModal" class="reservation-modal">
+    <div class="reservation-modal-content">
+        <div class="reservation-modal-header">
+            <h2 id="publicReservationPreviewTitle">Podgląd sali</h2>
+            <button type="button" class="modal-close" id="closePublicReservationPreviewModal">&times;</button>
+        </div>
+
+        <div class="step-container">
+            <h3>Podgląd zajętych miejsc</h3>
+
+            <div id="publicReservationPreviewSeatMap" class="seat-map"></div>
+
+            <div class="legend">
+                <span class="seat-legend available"></span> Wolne
+                <span class="seat-legend occupied"></span> Zajęte
+            </div>
+
+            <p class="public-preview-login-note">Jeżeli chcesz zarezerwować miejsce, zaloguj się.</p>
+
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" id="closePublicReservationPreviewBtn">Zamknij</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php if ($currentUser && $currentUser['role'] === 'ADMINISTRATOR'): ?>
     <div id="manageSeatsModal" class="reservation-modal">
         <div class="reservation-modal-content">
