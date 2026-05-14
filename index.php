@@ -222,8 +222,9 @@ foreach ($events as $event) {
                                         <div class="title_and_data">
                                             <i class="fa-regular fa-calendar-check <?php echo $statusClass; ?> icon"></i>
                                             <div style=" padding: 5px;">
-                                                <h4>
-                                                    <?php echo htmlspecialchars($reservation['event_name']); ?>
+                                                <h4 class="truncate-custom" onclick="this.classList.toggle('expanded')">
+                                                    <span class="text-content"><?php echo htmlspecialchars($reservation['event_name']); ?></span>
+                                                    <span class="read-more-trigger">Czytaj więcej...</span>
                                                 </h4>
                                                 <p>
                                                     <?php echo htmlspecialchars(formatDatePl($reservation['start_at'])); ?>
@@ -269,6 +270,39 @@ foreach ($events as $event) {
             </div>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const limitZnakow = 25; 
+            
+            document.querySelectorAll('.truncate-custom').forEach(el => {
+                const textSpan = el.querySelector('.text-content');
+                const btn = el.querySelector('.read-more-trigger');
+
+                if (textSpan && btn) {
+                    const dlugoscTekstu = textSpan.innerText.trim().length;
+
+                    if (dlugoscTekstu > limitZnakow) {
+                        btn.style.display = 'block';
+                        
+                        el.onclick = function() {
+                            this.classList.toggle('expanded');
+                            
+                            if (this.classList.contains('expanded')) {
+                                btn.style.display = 'none';
+                            } else {
+                                btn.style.display = 'block';
+                            }
+                        };
+                    } else {
+                        btn.style.display = 'none';
+                        el.style.cursor = 'default';
+                        el.onclick = null;
+                    }
+                }
+            });
+        });
+    </script>
 
     <footer>
         <p>Projekt zespołowy: System rezerwacji miejsc UWB</p>
