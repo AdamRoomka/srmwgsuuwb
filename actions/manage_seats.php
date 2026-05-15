@@ -182,6 +182,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_manage_seats'])
                     $userId = (int) $row['user_id'];
                     $countByUser[$userId] = ($countByUser[$userId] ?? 0) + 1;
                 }
+                
+                $updateReservationsStmt = $pdo->prepare("
+                    UPDATE occupied_seats
+                    WHERE event_id = :event_id
+                    AND user_id = :user_id
+                ");
+
+                $deleteEmptyReservationsStmt = $pdo->prepare("
+                    DELETE FROM occupied_seats
+                    WHERE event_id = :event_id
+                    AND user_id = :user_id
+                    AND seat_count <= 0
+                ");
 
                 foreach ($countByUser as $userId => $seatCount) {
                     $updateReservationsStmt->execute([
