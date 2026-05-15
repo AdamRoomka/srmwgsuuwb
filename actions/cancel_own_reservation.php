@@ -50,17 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_own_reservatio
             'user_id' => $userId,
         ]);
 
-        $deleteReservationsStmt = $pdo->prepare("
-            DELETE FROM reservations
-            WHERE event_id = :event_id
-              AND user_id = :user_id
-              AND status = 'AKTYWNA'
-        ");
-        $deleteReservationsStmt->execute([
-            'event_id' => $eventId,
-            'user_id' => $userId,
-        ]);
-
         $pdo->commit();
 
         $_SESSION['reservationMessage'] = 'Twoja rezerwacja została usunięta.';

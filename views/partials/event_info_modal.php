@@ -6,8 +6,6 @@
             <button type="button" class="modal-close" id="closeEventInfoModal">&times;</button>
         </div>
 
-
-
         <div class="step-container">
             <h4>Opis:</h4>
             <p id="eventInfoDescription"></p>
@@ -48,11 +46,7 @@
                 <button class="btn btn-primary" id="goToPreviewSeats">
                     Zobacz miejsca
                 </button>
-
             </div>
-
-
         </div>
-
     </div>
 </div>

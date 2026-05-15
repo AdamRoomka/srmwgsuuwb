@@ -80,17 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reserve_event_id'], $
                               AND seat_number IN ($deletePlaceholders)
                         ");
                         $deleteSeatsStmt->execute(array_merge([$eventId, $currentUser['id']], $currentUserSeats));
-
-                        $deleteReservationStmt = $pdo->prepare("
-                            DELETE FROM reservations
-                            WHERE event_id = :event_id
-                              AND user_id = :user_id
-                              AND status = 'AKTYWNA'
-                        ");
-                        $deleteReservationStmt->execute([
-                            'event_id' => $eventId,
-                            'user_id' => $currentUser['id'],
-                        ]);
                     }
 
                     if (!empty($selectedSeatsArray)) {
