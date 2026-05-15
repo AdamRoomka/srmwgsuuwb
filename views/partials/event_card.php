@@ -52,21 +52,34 @@
 
         <div class="event-actions">
             <?php if ($currentUser && $event['status'] === 'PLANOWANE' && $availableSeats > 0): ?>
-                <button class="btn btn-reserve open-reservation-modal" data-event-id="<?php echo (int) $event['id']; ?>"
+                <button 
+                    class="btn btn-reserve open-event-info-modal"
+                    data-event-id="<?php echo (int) $event['id']; ?>"
                     data-event-name="<?php echo htmlspecialchars($event['name']); ?>"
+                    data-event-description="<?php echo htmlspecialchars($event['description']); ?>"
+                    data-event-date="<?php echo htmlspecialchars(formatDatePl($event['start_at'])); ?>"
+                    data-event-duration="<?php echo (int) $event['duration_minutes']; ?>"
                     data-total-seats="<?php echo (int) $event['total_seats']; ?>"
                     data-available-seats="<?php echo $availableSeats; ?>"
                     data-occupied-seats='<?php echo htmlspecialchars(json_encode($eventOccupiedSeats), ENT_QUOTES, 'UTF-8'); ?>'>
-                    Rezerwuj
+                    Przeglądaj informacje
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
             <?php elseif (!$currentUser && $event['status'] === 'PLANOWANE' && $availableSeats > 0): ?>
-                <button class="btn btn-reserve open-public-reservation-preview"
+                <button 
+                    class="btn btn-reserve open-event-info-modal"
+                    data-event-id="<?php echo (int) $event['id']; ?>"
                     data-event-name="<?php echo htmlspecialchars($event['name']); ?>"
+                    data-event-description="<?php echo htmlspecialchars($event['description']); ?>"
+                    data-event-date="<?php echo htmlspecialchars(formatDatePl($event['start_at'])); ?>"
+                    data-event-duration="<?php echo (int) $event['duration_minutes']; ?>"
                     data-total-seats="<?php echo (int) $event['total_seats']; ?>"
+                    data-available-seats="<?php echo $availableSeats; ?>"
                     data-occupied-seats='<?php echo htmlspecialchars(json_encode($eventOccupiedSeats), ENT_QUOTES, 'UTF-8'); ?>'>
-                    Przeglądaj rezerwacje
+
+                    Przeglądaj informacje
                     <i class="fa-solid fa-chevron-right"></i>
+
                 </button>
             <?php elseif ($availableSeats <= 0 && $event['status'] === 'PLANOWANE'): ?>
                 <p class="blocked-msg">Wszystkie miejsca zajęte</p>

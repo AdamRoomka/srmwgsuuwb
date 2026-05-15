@@ -46,6 +46,21 @@ document.addEventListener('app:ready', function () {
     const reservationsList = document.getElementById('reservationsList');
     const reservationsListModalTitle = document.getElementById('reservationsListModalTitle');
 
+    const eventInfoModal = document.getElementById('eventInfoModal');
+    const closeEventInfoModal = document.getElementById('closeEventInfoModal');
+
+    const eventInfoTitle = document.getElementById('eventInfoTitle');
+    const eventInfoDescription = document.getElementById('eventInfoDescription');
+    const eventInfoDate = document.getElementById('eventInfoDate');
+    const eventInfoDuration = document.getElementById('eventInfoDuration');
+    const eventInfoSeats = document.getElementById('eventInfoSeats');
+    const eventInfoAvailable = document.getElementById('eventInfoAvailable');
+
+    const goToReservationSeats = document.getElementById('goToReservationSeats');
+    const goToPreviewSeats = document.getElementById('goToPreviewSeats');
+
+    let pendingReservationData = null;
+
     let selectedSeats = [];
     let occupiedSeats = [];
     let currentTotalSeats = 0;
@@ -172,12 +187,12 @@ document.addEventListener('app:ready', function () {
                 if (isOccupied) seat.classList.add('occupied');
                 if (isMine) seat.classList.add('mine');
                 if (isSelected) seat.classList.add('selected');
-                
+
                 // Mark new free seats selected for addition
                 if (!isAdminMode && !isOccupied && isSelected) {
                     seat.classList.add('adding');
                 }
-                
+
                 // Mark new free seats selected for addition in admin mode
                 if (isAdminMode && !isOccupied && isSelected) {
                     seat.classList.add('adding');
@@ -298,19 +313,143 @@ document.addEventListener('app:ready', function () {
         reservationsList.appendChild(list);
     }
 
-    document.querySelectorAll('.open-reservation-modal').forEach(button => {
-        button.addEventListener('click', function () {
-            currentTotalSeats = parseInt(this.dataset.totalSeats || '0', 10);
-            occupiedSeats = App.parseJsonSafely(this.dataset.occupiedSeats || '[]');
-            selectedSeats = getOwnOccupiedSeatsForEvent(occupiedSeats, currentUserId);
-            originalOwnSeats = getOwnOccupiedSeatsForEvent(occupiedSeats, currentUserId);
+    document.querySelectorAll('.open-event-info-modal').forEach(button => {
 
-            if (reserveEventId) reserveEventId.value = this.dataset.eventId || '';
-            updateSelectedSeatsInfo();
-            renderSeats();
-            App.openModal(reservationModal);
+        button.addEventListener('click', function () {
+
+
+            pendingReservationData = this.dataset;
+
+            eventInfoTitle.textContent = this.dataset.eventName;
+            eventInfoDescription.textContent = this.dataset.eventDescription;
+            eventInfoDate.textContent = this.dataset.eventDate;
+            eventInfoDuration.textContent = this.dataset.eventDuration + ' min';
+            eventInfoSeats.textContent = this.dataset.totalSeats;
+            eventInfoAvailable.textContent = this.dataset.availableSeats;
+
+            const isLoggedIn = currentUserId !== null;
+
+            if (isLoggedIn) {
+
+                goToReservationSeats.style.display = 'flex';
+                goToPreviewSeats.style.display = 'none';
+
+            } else {
+
+                goToReservationSeats.style.display = 'none';
+                goToPreviewSeats.style.display = 'flex';
+
+            }
+
+            document.querySelector(".container").style.overflow = "hidden";
+            App.openModal(eventInfoModal);
         });
+
     });
+
+    if (goToReservationSeats) {
+
+        goToReservationSeats.addEventListener('click', function () {
+
+            if (!pendingReservationData) return;
+
+            currentTotalSeats = parseInt(pendingReservationData.totalSeats || '0', 10);
+
+            occupiedSeats = App.parseJsonSafely(
+                pendingReservationData.occupiedSeats || '[]'
+            );
+
+            selectedSeats = getOwnOccupiedSeatsForEvent(
+                occupiedSeats,
+                currentUserId
+            );
+
+            originalOwnSeats = getOwnOccupiedSeatsForEvent(
+                occupiedSeats,
+                currentUserId
+            );
+
+            if (reserveEventId) {
+                reserveEventId.value = pendingReservationData.eventId || '';
+            }
+
+            updateSelectedSeatsInfo();
+
+            renderSeats();
+
+            document.querySelector(".container").style.overflow = '';
+            App.closeModal(eventInfoModal);
+
+            document.querySelector(".container").style.overflow = 'hidden';
+            App.openModal(reservationModal);
+
+        });
+
+    }
+
+    if (goToPreviewSeats) {
+
+        goToPreviewSeats.addEventListener('click', function () {
+
+            if (!pendingReservationData) return;
+
+            const totalSeats = parseInt(
+                pendingReservationData.totalSeats || '0',
+                10
+            );
+
+            const previewOccupiedSeats = App.parseJsonSafely(
+                pendingReservationData.occupiedSeats || '[]'
+            );
+
+            const eventName = pendingReservationData.eventName || '';
+
+            if (publicReservationPreviewTitle) {
+                publicReservationPreviewTitle.textContent =
+                    'Podgląd sali';
+            }
+
+            renderSeatGrid(
+                publicReservationPreviewSeatMap,
+                buildHallStructure(totalSeats),
+                previewOccupiedSeats,
+                [],
+                false,
+                currentUserId,
+                false
+            );
+
+            document.querySelector(".container").style.overflow = '';
+            App.closeModal(eventInfoModal);
+
+            document.querySelector(".container").style.overflow = 'hidden';
+            App.openModal(publicReservationPreviewModal);
+
+        });
+
+    }
+
+    if (closeEventInfoModal && eventInfoModal) {
+
+        closeEventInfoModal.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
+            App.closeModal(eventInfoModal);
+        });
+
+    }
+
+    if (eventInfoModal) {
+
+        eventInfoModal.addEventListener('click', function (e) {
+
+            if (e.target === eventInfoModal) {
+                document.querySelector(".container").style.overflow = '';
+                App.closeModal(eventInfoModal);
+            }
+
+        });
+
+    }
 
     publicReservationPreviewButtons.forEach(button => {
         button.addEventListener('click', function () {
@@ -332,6 +471,7 @@ document.addEventListener('app:ready', function () {
                 false
             );
 
+            document.querySelector(".container").style.overflow = 'hidden';
             App.openModal(publicReservationPreviewModal);
         });
     });
@@ -352,6 +492,7 @@ document.addEventListener('app:ready', function () {
 
             updateAdminSelectedSeatsInfo();
             renderAdminSeats();
+            document.querySelector(".container").style.overflow = 'hidden';
             App.openModal(manageSeatsModal);
         });
     });
@@ -389,6 +530,7 @@ document.addEventListener('app:ready', function () {
 
         renderReservationsList(occupiedSeatsData, totalSeatsFromButton);
 
+        document.querySelector(".container").style.overflow = 'hidden';
         App.openModal(reservationsListModal);
     });
 
@@ -411,18 +553,21 @@ document.addEventListener('app:ready', function () {
 
             renderReservationsList(occupiedSeatsData, totalSeatsFromButton);
 
+            document.querySelector(".container").style.overflow = 'hidden';
             App.openModal(reservationsListModal);
         });
     });
 
     if (closeReservationModal && reservationModal) {
         closeReservationModal.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(reservationModal);
         });
     }
 
     if (cancelReservationBtn && reservationModal) {
         cancelReservationBtn.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(reservationModal);
         });
     }
@@ -430,6 +575,7 @@ document.addEventListener('app:ready', function () {
     if (reservationModal) {
         reservationModal.addEventListener('click', function (e) {
             if (e.target === reservationModal) {
+                document.querySelector(".container").style.overflow = '';
                 App.closeModal(reservationModal);
             }
         });
@@ -437,12 +583,14 @@ document.addEventListener('app:ready', function () {
 
     if (closePublicReservationPreviewModal && publicReservationPreviewModal) {
         closePublicReservationPreviewModal.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(publicReservationPreviewModal);
         });
     }
 
     if (closePublicReservationPreviewBtn && publicReservationPreviewModal) {
         closePublicReservationPreviewBtn.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(publicReservationPreviewModal);
         });
     }
@@ -450,6 +598,7 @@ document.addEventListener('app:ready', function () {
     if (publicReservationPreviewModal) {
         publicReservationPreviewModal.addEventListener('click', function (e) {
             if (e.target === publicReservationPreviewModal) {
+                document.querySelector(".container").style.overflow = '';
                 App.closeModal(publicReservationPreviewModal);
             }
         });
@@ -457,12 +606,14 @@ document.addEventListener('app:ready', function () {
 
     if (closeManageSeatsModal && manageSeatsModal) {
         closeManageSeatsModal.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(manageSeatsModal);
         });
     }
 
     if (cancelManageSeatsBtn && manageSeatsModal) {
         cancelManageSeatsBtn.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(manageSeatsModal);
         });
     }
@@ -470,6 +621,7 @@ document.addEventListener('app:ready', function () {
     if (manageSeatsModal) {
         manageSeatsModal.addEventListener('click', function (e) {
             if (e.target === manageSeatsModal) {
+                document.querySelector(".container").style.overflow = '';
                 App.closeModal(manageSeatsModal);
             }
         });
@@ -519,12 +671,14 @@ document.addEventListener('app:ready', function () {
 
     if (closeReservationsListModal && reservationsListModal) {
         closeReservationsListModal.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(reservationsListModal);
         });
     }
 
     if (closeReservationsListBtn && reservationsListModal) {
         closeReservationsListBtn.addEventListener('click', function () {
+            document.querySelector(".container").style.overflow = '';
             App.closeModal(reservationsListModal);
         });
     }
@@ -532,6 +686,7 @@ document.addEventListener('app:ready', function () {
     if (reservationsListModal) {
         reservationsListModal.addEventListener('click', function (e) {
             if (e.target === reservationsListModal) {
+                document.querySelector(".container").style.overflow = '';
                 App.closeModal(reservationsListModal);
             }
         });

@@ -128,6 +128,7 @@ foreach ($events as $event) {
     <title>System Rezerwacji - Aula Główna</title>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/event-info.css">
     <link rel="stylesheet" href="assets/css/seat-map.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
@@ -179,6 +180,8 @@ foreach ($events as $event) {
 
                     <?php require __DIR__ . '/views/partials/create_event_modal.php'; ?>
                     <? // modal dodawania wydarzenia (tylko dla administratora) ?>
+                    
+                    <?php require __DIR__ . '/views/partials/event_info_modal.php'; ?>
 
                     <?php if (!empty($eventsToday)): ?>
                         <h2>Wydarzenia na dziś</h2>
@@ -205,6 +208,7 @@ foreach ($events as $event) {
                     <?php endif; ?>
 
                     <?php require __DIR__ . '/views/partials/reservation_modal.php'; ?>
+                    
                     <? // modal rezerwacji miejsc (tylko dla zalogowanych użytkowników) ?>
                 <?php endif; ?>
 
